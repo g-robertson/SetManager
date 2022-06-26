@@ -1,0 +1,7 @@
+target_sources(SetManager
+    PRIVATE user-set.cpp
+    PRIVATE global-set.cpp
+    PRIVATE subset.cpp
+    PRIVATE word-set.cpp
+    PRIVATE directory-set.cpp
+)
