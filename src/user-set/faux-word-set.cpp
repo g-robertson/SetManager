@@ -30,6 +30,7 @@ const auto FAUX_WORD_SET_MENU = ReinterpretMenu<FauxWordSet, UserSet, void>({
     {"AX", {"Add a word from the parent set", &FauxWordSet::addParentWord}},
     {"R", {"Remove a word", &FauxWordSet::removeWord}},
     {"RX", {"Remove a word by number in this set", &FauxWordSet::removeContainedWord}},
+    {"LE", {"List faux elements", &FauxWordSet::listFauxElements}},
     {"X", {"Exit set-specific options", &FauxWordSet::exitSetSpecificOptions}},
     {UserSet::EXIT_KEYWORD, {"Exit the program", &FauxWordSet::exitProgram}}
 });
@@ -124,6 +125,16 @@ void FauxWordSet::removeContainedWord() noexcept {
     }
     std::cerr << "Impossible error: [Should not be able to get a selection that does not exist in the parent set]";
     exitProgram();
+}
+
+void FauxWordSet::listFauxElements() noexcept {
+    std::cout << "Element list\n"
+              << std::string(80, '-') << '\n'
+              << "This set contains faux elements:\n";
+    for (const auto& element : elements_) {
+        std::cout << '\'' << element << "'\n";
+    }
+    std::cout << std::string(80, '-') << '\n';
 }
 
 void FauxWordSet::saveMachineSubset(std::ostream& saveLocation) const noexcept {
