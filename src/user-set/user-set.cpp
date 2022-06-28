@@ -49,6 +49,7 @@ bool UserSet::query() noexcept {
 
     if (onQueryEnter != nullptr) {
         while (onQueryEnter->query());
+        onQueryEnter = nullptr;
         return queryable;
     }
     if (preQuery()) {
