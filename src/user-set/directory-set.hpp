@@ -18,7 +18,7 @@ class DirectorySet : public SubSet {
         DirectorySet(UserSet* parent, const std::string& name, const std::string& directory);
 
         // #region SubSet public members override 
-        static std::unique_ptr<UserSet> createSet(UserSet& parent, const std::string& name);
+        static UserSet* createSet(UserSet& parent, const std::string& name);
         // #endregion 
         // #region UserSet public members override 
         static constexpr char type_ = 'D';
@@ -31,6 +31,7 @@ class DirectorySet : public SubSet {
         const std::set<std::string>* complementElements() const override;
         // #endregion 
 
+        bool updateDirectory();
         bool listMirroredDirectory();
 
         std::string_view directory() const;

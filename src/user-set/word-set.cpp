@@ -15,8 +15,8 @@ WordSet::WordSet(UserSet* parent, const std::string& name)
     : SubSet(parent, name)
 {}
 
-std::unique_ptr<UserSet> WordSet::createSet(UserSet& parent, const std::string& name) {
-    return std::unique_ptr<UserSet>(new WordSet(&parent, name));
+UserSet* WordSet::createSet(UserSet& parent, const std::string& name) {
+    return new WordSet(&parent, name);
 }
 
 const auto WORD_SET_MENU = ReinterpretMenu<WordSet, UserSet, bool>({
@@ -26,7 +26,7 @@ const auto WORD_SET_MENU = ReinterpretMenu<WordSet, UserSet, bool>({
     {"RX", {"Remove a word by number in this set", &WordSet::removeContainedWord}},
     {"X", {"Exit set-specific options", &WordSet::moveUpHierarchy}},
     {UserSet::EXIT_KEYWORD, {"Exit the program", &WordSet::exitProgram}}
-});
+}, true);
 
 const Menu<UserSet, bool>& WordSet::setSpecificMenu() const {
     return WORD_SET_MENU;
@@ -81,7 +81,7 @@ bool WordSet::addParentWord() {
             return true;
         }
     }
-    throw std::logic_error("Logic error, Unresolveable [Should not be able to get a selection that does not exist in the parent set]");
+    throw std::logic_error("Unappearable [Should not be able to get a selection that does not exist in the parent set]");
 }
 
 bool WordSet::removeWord() {
@@ -90,7 +90,7 @@ bool WordSet::removeWord() {
     ignoreAll(std::cin);
     std::getline(std::cin, word);
 
-    removedElement(word);
+    removedElement(word, true);
     return true;
 }
 
@@ -117,11 +117,11 @@ bool WordSet::removeContainedWord() {
     for (const auto& element : elements_) {
         ++count;
         if (count == selection) {
-            removedElement(element);
+            removedElement(element, true);
             return true;
         }
     }
-    throw std::logic_error("Logic error, Unresolveable [Should not be able to get a selection that does not exist in the parent set]");
+    throw std::logic_error("Unappearable [Should not be able to get a selection that does not exist in the parent set]");
 }
 
 void WordSet::saveMachineSubset(std::ostream& saveLocation) const {
@@ -145,7 +145,7 @@ void WordSet::loadMachineSubset(std::istream& loadLocation) {
         loadLocation.read(element.data(), elementSize);
         // if parent doesn't contain the element then issue a warning
         if (!parent->contains(element)) {
-            throw std::logic_error("Partial load, resolveable unaccounted for. [WordSet parent element not found warning solveable]");
+            throw std::logic_error("Partial load, load-resolveable unaccounted for. [WordSet parent element not found warning solveable]");
         }
         elements_.emplace(std::move(element));
     }
@@ -159,9 +159,12 @@ const std::set<std::string>* WordSet::complementElements() const {
     return &NO_ELEMENTS;
 }
 
-void WordSet::removedElement(const std::string& element) {
+void WordSet::removedElement(const std::string& element, bool expected) {
+    if (!expected) {
+        throw std::logic_error("Resolveable unaccounted for. [WordSet had a word removed unexpectedly]");
+    }
     for (const auto& subset : subsets) {
-        subset.second->removedElement(element);
+        subset.second->removedElement(element, true);
     }
     elements_.erase(element);
 }

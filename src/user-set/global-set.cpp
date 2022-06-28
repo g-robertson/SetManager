@@ -27,12 +27,12 @@ const std::set<std::string>* GlobalSet::complementElements() const {
     return &NO_ELEMENTS;
 }
 
-const auto GLOBAL_CREATEABLE_SUBSET_MENU = StaticMenu<void, std::unique_ptr<UserSet>, UserSet&, const std::string&>({
+const auto GLOBAL_CREATEABLE_SUBSET_MENU = StaticMenu<void, UserSet*, UserSet&, const std::string&>({
     {std::string(1, WordSet::type_), {"WordSet", WordSet::createSet}},
     {std::string(1, DirectorySet::type_), {"DirectorySet", DirectorySet::createSet}},
     {UserSet::EXIT_KEYWORD, {"Exit", UserSet::EXIT_SET_MENU}}
-});
+}, nullptr);
 
-const Menu<void, std::unique_ptr<UserSet>, UserSet&, const std::string&>& GlobalSet::createableSubsetMenu() const {
+const Menu<void, UserSet*, UserSet&, const std::string&>& GlobalSet::createableSubsetMenu() const {
     return GLOBAL_CREATEABLE_SUBSET_MENU;
 }

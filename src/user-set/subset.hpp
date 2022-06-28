@@ -14,12 +14,12 @@ class SubSet : public UserSet {
         SubSet(UserSet* parent, const std::string& name);
 
         // Must exist in all derived SubSets for creation
-        // static std::unique_ptr<UserSet> createSet(UserSet& parent, const std::string& name);
+        // static UserSet* createSet(UserSet& parent, const std::string& name);
 
         std::string_view name() const override;
     private:
         // Queries which subsets are able to be created from SubSet type UserSets
-        const Menu<void, std::unique_ptr<UserSet>, UserSet&, const std::string&>& createableSubsetMenu() const override;
+        const Menu<void, UserSet*, UserSet&, const std::string&>& createableSubsetMenu() const override;
 
         std::string name_;
 };

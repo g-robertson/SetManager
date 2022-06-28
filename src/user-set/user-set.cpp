@@ -24,8 +24,8 @@ const std::string UserSet::EXIT_KEYWORD = "EXIT";
 const std::string UserSet::DEFAULT_MACHINE_LOCATION = "managed-sets.txt";
 const std::string UserSet::DEFAULT_HUMAN_LOCATION = "human-readable-sets.txt";
 
-std::unique_ptr<UserSet> UserSet::EXIT_SET_MENU(UserSet&, const std::string&) {
-    return std::unique_ptr<UserSet>();
+UserSet* UserSet::EXIT_SET_MENU(UserSet&, const std::string&) {
+    return nullptr;
 }
 
 UserSet::UserSet(UserSet* userSet)
@@ -48,7 +48,7 @@ const auto USER_SET_MENU = StaticMenu<UserSet, bool>({
     {"E", {"Enter a subset", &UserSet::enterSubset}},
     {"X", {"Move up one set hierarchy, or exit program if at top", &UserSet::moveUpHierarchy}},
     {UserSet::EXIT_KEYWORD, {"Exit the program", &UserSet::exitProgram}}
-});
+}, true);
 
 const Menu<UserSet, bool>& UserSet::menu() const {
     return USER_SET_MENU;
@@ -57,7 +57,7 @@ const Menu<UserSet, bool>& UserSet::menu() const {
 const auto USER_SET_SPECIFIC_BASE_MENU = StaticMenu<UserSet, bool>({
     {"X", {"Exit set-specific options", &UserSet::moveUpHierarchy}},
     {UserSet::EXIT_KEYWORD, {"Exit the program", &UserSet::exitProgram}}
-});
+}, true);
 
 const Menu<UserSet, bool>& UserSet::setSpecificMenu() const {
     return USER_SET_SPECIFIC_BASE_MENU;
@@ -208,7 +208,7 @@ void UserSet::loadMachineSubsets_(std::istream& loadLocation) {
             case GlobalSet::type_:
             default:
                 std::cout << "Failed to load subsets due to improper subset file format (global or unknown type in tree).\n";
-                throw std::logic_error("Partial load, resolveable unaccounted for. [Partial load due to global or unknown type]");
+                throw std::logic_error("Partial load, load-resolveable unaccounted for. [Partial load due to global or unknown type]");
                 break;
         }
         subsets.at(name)->loadMachineSubsets_(loadLocation);
@@ -297,11 +297,11 @@ bool UserSet::createSubset() {
 
     std::cout << "Enter a type for the subset\n";
 
-    auto subset = createableSubsetMenu().query(*this, name);
-    if (!subset) {
+    auto* subset = createableSubsetMenu().query(*this, name);
+    if (subset == nullptr) {
         return true;
     }
-    subsets[name] = std::move(subset);
+    subsets[name] = std::unique_ptr<UserSet>(subset);
     return true;
 }
 
@@ -379,8 +379,8 @@ bool UserSet::contains(const std::string& element) const {
     }
 }
 
-void UserSet::removedElement(const std::string& element) {
+void UserSet::removedElement(const std::string& element, bool expected) {
     for (const auto& subset : subsets) {
-        subset.second->removedElement(element);
+        subset.second->removedElement(element, expected);
     }
 }

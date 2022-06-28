@@ -23,7 +23,7 @@ std::ostream& operator<<(std::ostream& ostr, const copyformat_&) {
 
 std::ostream& operator<<(std::ostream& ostr, const replaceformat_&) {
     if (formats.size() == 0) {
-        throw std::logic_error("Unresolveable, [Tried to pop a format when none have been pushed]");
+        throw std::logic_error("Unappearable, [Tried to pop a format when none have been pushed]");
     }
     ostr.copyfmt(*formats.top());
     formats.pop();

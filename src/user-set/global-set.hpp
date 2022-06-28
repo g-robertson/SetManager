@@ -23,5 +23,5 @@ class GlobalSet : public UserSet {
         const std::set<std::string>* complementElements() const override;
         // #endregion
     private:
-        const Menu<void, std::unique_ptr<UserSet>, UserSet&, const std::string&>& createableSubsetMenu() const override;
+        const Menu<void, UserSet*, UserSet&, const std::string&>& createableSubsetMenu() const override;
 };

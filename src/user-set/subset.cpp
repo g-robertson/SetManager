@@ -17,12 +17,12 @@ std::string_view SubSet::name() const {
     return name_;
 }
 
-const auto SUBSET_CREATEABLE_SUBSET_MENU = StaticMenu<void, std::unique_ptr<UserSet>, UserSet&, const std::string&>({
+const auto SUBSET_CREATEABLE_SUBSET_MENU = StaticMenu<void, UserSet*, UserSet&, const std::string&>({
     {std::string(1, WordSet::type_), {"WordSet", WordSet::createSet}},
     {UserSet::EXIT_KEYWORD, {"Exit", UserSet::EXIT_SET_MENU}}
-});
+}, nullptr);
 
 // Queries which subsets are able to be created from SubSet type UserSets
-const Menu<void, std::unique_ptr<UserSet>, UserSet&, const std::string&>& SubSet::createableSubsetMenu() const {
+const Menu<void, UserSet*, UserSet&, const std::string&>& SubSet::createableSubsetMenu() const {
     return SUBSET_CREATEABLE_SUBSET_MENU;
 }

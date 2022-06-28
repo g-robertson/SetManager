@@ -18,34 +18,55 @@ DirectorySet::DirectorySet(UserSet* parent, const std::string& name)
 
 DirectorySet::DirectorySet(UserSet* parent, const std::string& name, const std::string& directory)
     : SubSet(parent, name), isMirroring(true), directory_(std::filesystem::absolute(directory))
-{
-    if (!std::filesystem::is_directory(directory_)) {
-        throw std::logic_error("Directory set created on directory that does not exist.");
-    }
-}
+{}
 
-std::unique_ptr<UserSet> DirectorySet::createSet(UserSet& parent, const std::string& name) {
+UserSet* DirectorySet::createSet(UserSet& parent, const std::string& name) {
     std::cout << "Enter the name of the directory you would like this set to mirror: ";
     std::string directory;
     ignoreAll(std::cin);
     std::getline(std::cin, directory);
 
-    if (std::filesystem::exists(directory) && std::filesystem::is_directory(directory)) {
-        return std::unique_ptr<UserSet>(new DirectorySet(&parent, name, directory));
+    auto* directorySet = new DirectorySet(&parent, name, directory);
+    try {
+        directorySet->updateDirectory();
+        return directorySet;
+    // Don't really care what exception happened, it is likely a logic_error (I threw it), or a filesystem_error (The directory iterator threw it)
+    // The only real problem is that the directory set can't be created in a state where directory access fails or throws, so return nothing
+    } catch (const std::exception&) {
+        std::cout << "Could not create a directory set because there is no directory with the name '" << directory << "'.\n";
+        delete directorySet;
+        return nullptr;
     }
-
-    std::cout << "Could not create a directory set because there is no directory with the name '" << directory << "'.\n";
-    return nullptr;
 }
 
 const auto DIRECTORY_SET_MENU = ReinterpretMenu<DirectorySet, UserSet, bool>({
     {"LD", {"List mirrored directory", &DirectorySet::listMirroredDirectory}},
+    {"U", {"Update mirrored directory contents", &DirectorySet::updateDirectory}},
     {"X", {"Exit set-specific options", &DirectorySet::moveUpHierarchy}},
     {UserSet::EXIT_KEYWORD, {"Exit the program", &DirectorySet::exitProgram}}
-});
+}, true);
 
 const Menu<UserSet, bool>& DirectorySet::setSpecificMenu() const {
     return DIRECTORY_SET_MENU;
+}
+
+bool DirectorySet::updateDirectory() {
+    if (!std::filesystem::is_directory(directory_)) {
+        throw std::logic_error("Unresolveable, Directory set created on directory that does not exist.");
+    }
+    std::set<std::string> newElements;
+    for (const auto& entry : std::filesystem::directory_iterator(directory_)) {
+        newElements.insert(entry.path().lexically_relative(directory_).string());
+    }
+
+    for (const auto& element : elements_) {
+        if (newElements.find(element) == newElements.end()) {
+            removedElement(element, false);
+        }
+    }
+
+    elements_ = std::move(newElements);
+    return true;
 }
 
 bool DirectorySet::listMirroredDirectory() {
@@ -55,19 +76,15 @@ bool DirectorySet::listMirroredDirectory() {
 
 const std::set<std::string>* DirectorySet::elements() const {
     if (!isMirroring) {
-        throw std::logic_error("Unresolveable [Attempted to interact with directory set that is not mirroring]");
+        throw std::logic_error("Unappearable [Attempted to interact with directory set that is not mirroring]");
     }
 
-    elements_.clear();
-    for (const auto& entry : std::filesystem::directory_iterator(directory_)) {
-        elements_.insert(entry.path().lexically_relative(directory_).generic_string());
-    }
     return &elements_;
 }
 
 const std::set<std::string>* DirectorySet::complementElements() const {
     if (!isMirroring) {
-        throw std::logic_error("Unresolveable [Attempted to interact with directory set that is not mirroring]");
+        throw std::logic_error("Unappearable [Attempted to interact with directory set that is not mirroring]");
     }
 
     return nullptr;
@@ -75,7 +92,7 @@ const std::set<std::string>* DirectorySet::complementElements() const {
 
 std::string_view DirectorySet::directory() const {
     if (!isMirroring) {
-        throw std::logic_error("Unresolveable [Attempted to interact with directory set that is not mirroring]");
+        throw std::logic_error("Unappearable [Attempted to interact with directory set that is not mirroring]");
     }
 
     return directory_.c_str();
@@ -83,7 +100,7 @@ std::string_view DirectorySet::directory() const {
 
 void DirectorySet::saveMachineSubset(std::ostream& saveLocation) const {
     if (!isMirroring) {
-        throw std::logic_error("Unresolveable [Attempted to interact with directory set that is not mirroring]");
+        throw std::logic_error("Unappearable [Attempted to interact with directory set that is not mirroring]");
     }
 
     std::string_view directoryString = directory_.c_str();
@@ -102,9 +119,10 @@ void DirectorySet::loadMachineSubset(std::istream& loadLocation) {
     directory_ = std::filesystem::absolute(directoryString);
     isMirroring = true;
     if (!std::filesystem::exists(directory_)) {
-        throw std::logic_error("Resolveable, [Directory mirrored by directory set did not exist]");
+        throw std::logic_error("Load-resolveable, [Directory mirrored by directory set did not exist]");
     }
     if (!std::filesystem::is_directory(directory_)) {
-        throw std::logic_error("Resolveable, [Directory mirrored by directory set is not a directory]");
+        throw std::logic_error("Load-resolveable, [Directory mirrored by directory set is not a directory]");
     }
+    updateDirectory();
 }

@@ -42,7 +42,7 @@ class UserSet {
         virtual char type() const = 0;
 
         bool contains(const std::string& element) const;
-        virtual void removedElement(const std::string& element);
+        virtual void removedElement(const std::string& element, bool expected);
         virtual const std::set<std::string>* elements() const = 0;
         virtual const std::set<std::string>* complementElements() const = 0;
 
@@ -50,14 +50,14 @@ class UserSet {
         const static std::string EXIT_KEYWORD;
         const static std::string DEFAULT_MACHINE_LOCATION;
         const static std::string DEFAULT_HUMAN_LOCATION;
-        static std::unique_ptr<UserSet> EXIT_SET_MENU(UserSet&, const std::string&);
+        static UserSet* EXIT_SET_MENU(UserSet&, const std::string&);
     protected:
         UserSet* parent;
         std::map<std::string, std::unique_ptr<UserSet>> subsets;
 
     private:
         const Menu<UserSet, bool>& menu() const;
-        virtual const Menu<void, std::unique_ptr<UserSet>, UserSet&, const std::string&>& createableSubsetMenu() const = 0;
+        virtual const Menu<void, UserSet*, UserSet&, const std::string&>& createableSubsetMenu() const = 0;
         virtual const Menu<UserSet, bool>& setSpecificMenu() const;
 
         void saveAllConnectedSubsets(void (UserSet::*saveMethod)(std::ostream& saveLocation) const, std::string_view defaultSaveLocation) const;

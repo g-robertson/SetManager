@@ -14,7 +14,7 @@ class WordSet : public SubSet {
         WordSet(UserSet* parent, const std::string& name);
 
         // #region SubSet public members override 
-        static std::unique_ptr<UserSet> createSet(UserSet& parent, const std::string& name);
+        static UserSet* createSet(UserSet& parent, const std::string& name);
         // #endregion 
         // #region UserSet public members override 
         static constexpr char type_ = 'W';
@@ -32,7 +32,7 @@ class WordSet : public SubSet {
         bool removeWord();
         bool removeContainedWord();
 
-        void removedElement(const std::string& element) override;
+        void removedElement(const std::string& element, bool expected) override;
     private:
         // #region UserSet private members override 
         const Menu<UserSet, bool>& setSpecificMenu() const override;
