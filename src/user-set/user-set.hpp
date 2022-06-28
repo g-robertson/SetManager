@@ -76,5 +76,5 @@ class UserSet {
         bool loadFailed = false;
 
         void saveHumanSubsets_(std::ostream& saveLocation, int indentation) const noexcept;
-        void loadMachineSubsets_(std::istream& loadLocation) noexcept;
+        bool loadMachineSubsets_(std::istream& loadLocation) noexcept;
 };

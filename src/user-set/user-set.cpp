@@ -205,9 +205,8 @@ void UserSet::saveMachineSubsets(std::ostream& saveLocation) const noexcept {
     saveLocation << "0\n";
 }
 
-void UserSet::loadMachineSubsets_(std::istream& loadLocation) noexcept {
+bool UserSet::loadMachineSubsets_(std::istream& loadLocation) noexcept {
     loadMachineSubset(loadLocation);
-    
     while (!loadFailed) {
         char type;
         loadLocation >> type;
@@ -235,12 +234,11 @@ void UserSet::loadMachineSubsets_(std::istream& loadLocation) noexcept {
                 break;
             case GlobalSet::type_:
             default:
-                loadFailed = true;
-                return;
+                return true;
         }
-        subsets.at(name)->loadMachineSubsets_(loadLocation);
+        loadFailed = subsets.at(name)->loadMachineSubsets_(loadLocation);
     }
-
+    return false;
 }
 
 void UserSet::loadMachineSubsets(std::istream& loadLocation) noexcept {
