@@ -8,21 +8,23 @@
 #include "subset.hpp"
 
 #include "word-set.hpp"
+#include "faux-word-set.hpp"
 
-SubSet::SubSet(UserSet* parent, const std::string& name)
+SubSet::SubSet(UserSet* parent, const std::string& name) noexcept
     : UserSet(parent), name_(name)
 {}
 
-std::string_view SubSet::name() const {
+std::string_view SubSet::name() const noexcept {
     return name_;
 }
 
 const auto SUBSET_CREATEABLE_SUBSET_MENU = StaticMenu<void, UserSet*, UserSet&, const std::string&>({
     {std::string(1, WordSet::type_), {"WordSet", WordSet::createSet}},
+    {std::string(1, FauxWordSet::type_), {"FauxWordSet", FauxWordSet::createSet}},
     {UserSet::EXIT_KEYWORD, {"Exit", UserSet::EXIT_SET_MENU}}
 });
 
 // Queries which subsets are able to be created from SubSet type UserSets
-const Menu<void, UserSet*, UserSet&, const std::string&>& SubSet::createableSubsetMenu() const {
+const Menu<void, UserSet*, UserSet&, const std::string&>& SubSet::createableSubsetMenu() const noexcept {
     return SUBSET_CREATEABLE_SUBSET_MENU;
 }

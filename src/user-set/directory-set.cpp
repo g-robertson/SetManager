@@ -12,31 +12,23 @@
 
 #include <filesystem>
 
-DirectorySet::DirectorySet(UserSet* parent, const std::string& name)
-    : SubSet(parent, name), isMirroring(false)
+DirectorySet::DirectorySet(UserSet* parent, const std::string& name) noexcept
+    : SubSet(parent, name)
 {}
 
-DirectorySet::DirectorySet(UserSet* parent, const std::string& name, const std::string& directory)
-    : SubSet(parent, name), isMirroring(true), directory_(std::filesystem::absolute(directory))
-{}
+DirectorySet::DirectorySet(UserSet* parent, const std::string& name, const std::string& directory) noexcept
+    : SubSet(parent, name), directory_(std::filesystem::absolute(directory))
+{
+    updateDirectory();
+}
 
-UserSet* DirectorySet::createSet(UserSet& parent, const std::string& name) {
+UserSet* DirectorySet::createSet(UserSet& parent, const std::string& name) noexcept {
     std::cout << "Enter the name of the directory you would like this set to mirror: ";
     std::string directory;
     ignoreAll(std::cin);
     std::getline(std::cin, directory);
 
-    auto* directorySet = new DirectorySet(&parent, name, directory);
-    try {
-        directorySet->updateDirectory();
-        return directorySet;
-    // Don't really care what exception happened, it is likely a logic_error (I threw it), or a filesystem_error (The directory iterator threw it)
-    // The only real problem is that the directory set can't be created in a state where directory access fails or throws, so return nothing
-    } catch (const std::exception&) {
-        std::cout << "Could not create a directory set because there is no directory with the name '" << directory << "'.\n";
-        delete directorySet;
-        return nullptr;
-    }
+    return new DirectorySet(&parent, name, directory);
 }
 
 const auto DIRECTORY_SET_MENU = ReinterpretMenu<DirectorySet, UserSet, void>({
@@ -46,11 +38,21 @@ const auto DIRECTORY_SET_MENU = ReinterpretMenu<DirectorySet, UserSet, void>({
     {UserSet::EXIT_KEYWORD, {"Exit the program", &DirectorySet::exitProgram}}
 });
 
-const Menu<UserSet, void>& DirectorySet::setSpecificMenu() const {
+const Menu<UserSet, void>& DirectorySet::setSpecificMenu() const noexcept {
     return DIRECTORY_SET_MENU;
 }
 
-void DirectorySet::updateDirectory() {
+void DirectorySet::changeDirectory() noexcept {
+    std::cout << "Enter the name of the directory you would like this set to mirror: ";
+    std::string directory;
+    ignoreAll(std::cin);
+    std::getline(std::cin, directory);
+    directory_ = std::filesystem::absolute(directory);
+
+    updateDirectory();
+}
+
+void DirectorySet::updateDirectory() noexcept {
     std::set<std::string> newElements;
     try {
         if (!std::filesystem::is_directory(directory_)) {
@@ -60,16 +62,7 @@ void DirectorySet::updateDirectory() {
             newElements.insert(entry.path().lexically_relative(directory_).string());
         }
     } catch (...) {
-        std::cout << "The directory is unaccessible,\n"
-                  << "you may either delete this set as a result of this, or the program can continue running with the previously gathered directory contents\n"
-                  << "Enter [D] to delete, or anything else to continue: ";
-        std::string input;
-        std::cin >> input;
-        if (std::toupper(input[0], std::locale()) == 'D') {
-            parent->onQueryRemove = this;
-            queryable = false;
-            setSpecificQueryable = false;
-        }
+        handleDirectoryError();
         return;
     }
     for (const auto& element : elements_) {
@@ -81,44 +74,44 @@ void DirectorySet::updateDirectory() {
     elements_ = std::move(newElements);
 }
 
-void DirectorySet::listMirroredDirectory() {
+void DirectorySet::listMirroredDirectory() noexcept {
     std::cout << directory() << '\n';
 }
 
-const std::set<std::string>* DirectorySet::elements() const {
-    if (!isMirroring) {
-        throw std::logic_error("Unappearable [Attempted to interact with directory set that is not mirroring]");
-    }
-
+const std::set<std::string>* DirectorySet::elements() const noexcept {
     return &elements_;
 }
 
-const std::set<std::string>* DirectorySet::complementElements() const {
-    if (!isMirroring) {
-        throw std::logic_error("Unappearable [Attempted to interact with directory set that is not mirroring]");
-    }
-
+const std::set<std::string>* DirectorySet::complementElements() const noexcept {
     return nullptr;
 }
 
-std::string_view DirectorySet::directory() const {
-    if (!isMirroring) {
-        throw std::logic_error("Unappearable [Attempted to interact with directory set that is not mirroring]");
-    }
-
+std::string_view DirectorySet::directory() const noexcept {
     return directory_.c_str();
 }
 
-void DirectorySet::saveMachineSubset(std::ostream& saveLocation) const {
-    if (!isMirroring) {
-        throw std::logic_error("Unappearable [Attempted to interact with directory set that is not mirroring]");
+void DirectorySet::handleDirectoryError() noexcept {
+    std::cout << "The directory '" << directory() << "' is unaccessible,\n"
+              << "you may either delete this set, change  exit the program, or the program can continue running with the previously gathered directory contents (this will be nothing on load)\n"
+              << "Enter [D] to delete, [E] to exit the program without saving, or anything else to continue: ";
+    std::string input;
+    std::cin >> input;
+    if (std::toupper(input[0], std::locale()) == 'D') {
+        parent->onQueryRemove = this;
+        queryable = false;
+        setSpecificQueryable = false;
     }
+    if (std::toupper(input[0], std::locale()) == 'E') {
+        exit(0);
+    }
+}
 
+void DirectorySet::saveMachineSubset(std::ostream& saveLocation) const noexcept {
     std::string_view directoryString = directory_.c_str();
     saveLocation << directoryString.size() << ' ' << directoryString;
 }
 
-void DirectorySet::loadMachineSubset(std::istream& loadLocation) {
+void DirectorySet::loadMachineSubset(std::istream& loadLocation) noexcept {
     size_t directorySize;
     loadLocation >> directorySize;
     // directory names require null termination, I don't know why, it's probably documented somewhere
@@ -128,12 +121,5 @@ void DirectorySet::loadMachineSubset(std::istream& loadLocation) {
     loadLocation.read(directoryString.data(), directorySize);
 
     directory_ = std::filesystem::absolute(directoryString);
-    isMirroring = true;
-    if (!std::filesystem::exists(directory_)) {
-        throw std::logic_error("Load-resolveable, [Directory mirrored by directory set did not exist]");
-    }
-    if (!std::filesystem::is_directory(directory_)) {
-        throw std::logic_error("Load-resolveable, [Directory mirrored by directory set is not a directory]");
-    }
     updateDirectory();
 }

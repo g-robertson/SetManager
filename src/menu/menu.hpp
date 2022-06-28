@@ -11,19 +11,19 @@
 template <typename TClass, typename TReturn, typename... TArgs>
 class Menu {
     public:
-        virtual TReturn query(TClass& object, TArgs&... args) const = 0;
+        virtual TReturn query(TClass& object, TArgs&... args) const noexcept = 0;
 };
 
 template <typename TReturn, typename... TArgs>
 class Menu<void, TReturn, TArgs...> {
     public:
-        virtual TReturn query(TArgs&... args) const = 0;
+        virtual TReturn query(TArgs&... args) const noexcept = 0;
 };
 
 template <typename TClass, typename TReturn, typename... TArgs>
 class StaticMenu : public Menu<TClass, TReturn, TArgs...> {
     public:
-        using optionType = std::pair<std::string, TReturn (TClass::*)(TArgs...)>;
+        using optionType = std::pair<std::string, TReturn (TClass::*)(TArgs...) noexcept>;
         StaticMenu(const std::list<std::pair<std::string, optionType>>& optionList)
             : Menu<TClass, TReturn, TArgs...>()
         {
@@ -38,7 +38,7 @@ class StaticMenu : public Menu<TClass, TReturn, TArgs...> {
             }
         }
 
-        TReturn query(TClass& object, TArgs&... args) const override {
+        TReturn query(TClass& object, TArgs&... args) const noexcept override {
             while (true) {
                 std::cout << "Select an option (case-insensitive):\n"
                           << std::string(80, '-') << '\n';
@@ -68,7 +68,7 @@ class StaticMenu : public Menu<TClass, TReturn, TArgs...> {
 template <typename TReturn, typename... TArgs>
 class StaticMenu<void, TReturn, TArgs...> : public Menu<void, TReturn, TArgs...> {
     public:
-        using optionType = std::pair<std::string, TReturn (*)(TArgs...)>;
+        using optionType = std::pair<std::string, TReturn (*)(TArgs...) noexcept>;
         StaticMenu(const std::list<std::pair<std::string, optionType>>& optionList)
             : Menu<void, TReturn, TArgs...>()
         {
@@ -83,7 +83,7 @@ class StaticMenu<void, TReturn, TArgs...> : public Menu<void, TReturn, TArgs...>
             }
         }
 
-        TReturn query(TArgs&... args) const override {
+        TReturn query(TArgs&... args) const noexcept override {
             while (true) {
                 std::cout << "Select an option (case-insensitive):\n"
                           << std::string(80, '-') << '\n';
@@ -112,7 +112,7 @@ class StaticMenu<void, TReturn, TArgs...> : public Menu<void, TReturn, TArgs...>
 template <typename TDerived, typename TClass, typename TReturn, typename... TArgs>
 class ReinterpretMenu : public Menu<TClass, TReturn, TArgs...> {
     public:
-        using optionType = std::pair<std::string, TReturn (TDerived::*)(TArgs...)>;
+        using optionType = std::pair<std::string, TReturn (TDerived::*)(TArgs...) noexcept>;
         ReinterpretMenu(const std::list<std::pair<std::string, optionType>>& optionList)
             : Menu<TClass, TReturn, TArgs...>()
         {
@@ -127,7 +127,7 @@ class ReinterpretMenu : public Menu<TClass, TReturn, TArgs...> {
             }
         }
 
-        TReturn query(TClass& object, TArgs&... args) const override {
+        TReturn query(TClass& object, TArgs&... args) const noexcept override {
             while (true) {
                 std::cout << "Select an option (case-insensitive):\n"
                           << std::string(80, '-') << '\n';

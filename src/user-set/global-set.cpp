@@ -7,32 +7,34 @@
 #include "global-set.hpp"
 
 #include "word-set.hpp"
+#include "faux-word-set.hpp"
 #include "directory-set.hpp"
 
-std::string_view GlobalSet::name() const {
+std::string_view GlobalSet::name() const noexcept {
     return "GLOBAL";
 }
 
-void GlobalSet::saveMachineSubset(std::ostream&) const {
+void GlobalSet::saveMachineSubset(std::ostream&) const noexcept {
 }
 
-void GlobalSet::loadMachineSubset(std::istream&) {
+void GlobalSet::loadMachineSubset(std::istream&) noexcept {
 }
 
-const std::set<std::string>* GlobalSet::elements() const {
+const std::set<std::string>* GlobalSet::elements() const noexcept {
     return nullptr;
 }
 
-const std::set<std::string>* GlobalSet::complementElements() const {
+const std::set<std::string>* GlobalSet::complementElements() const noexcept {
     return &NO_ELEMENTS;
 }
 
 const auto GLOBAL_CREATEABLE_SUBSET_MENU = StaticMenu<void, UserSet*, UserSet&, const std::string&>({
     {std::string(1, WordSet::type_), {"WordSet", WordSet::createSet}},
+    {std::string(1, FauxWordSet::type_), {"FauxWordSet", FauxWordSet::createSet}},
     {std::string(1, DirectorySet::type_), {"DirectorySet", DirectorySet::createSet}},
     {UserSet::EXIT_KEYWORD, {"Exit", UserSet::EXIT_SET_MENU}}
 });
 
-const Menu<void, UserSet*, UserSet&, const std::string&>& GlobalSet::createableSubsetMenu() const {
+const Menu<void, UserSet*, UserSet&, const std::string&>& GlobalSet::createableSubsetMenu() const noexcept {
     return GLOBAL_CREATEABLE_SUBSET_MENU;
 }

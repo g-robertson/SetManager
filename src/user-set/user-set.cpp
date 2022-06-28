@@ -8,6 +8,7 @@
 
 #include "global-set.hpp"
 #include "word-set.hpp"
+#include "faux-word-set.hpp"
 #include "directory-set.hpp"
 #include "helpers.hpp"
 
@@ -24,21 +25,35 @@ const std::string UserSet::EXIT_KEYWORD = "EXIT";
 const std::string UserSet::DEFAULT_MACHINE_LOCATION = "managed-sets.txt";
 const std::string UserSet::DEFAULT_HUMAN_LOCATION = "human-readable-sets.txt";
 
-UserSet* UserSet::EXIT_SET_MENU(UserSet&, const std::string&) {
+UserSet* UserSet::EXIT_SET_MENU(UserSet&, const std::string&) noexcept {
     return nullptr;
 }
 
-UserSet::UserSet(UserSet* userSet)
+UserSet::UserSet(UserSet* userSet) noexcept
     : parent(userSet)
 {}
 
-bool UserSet::query() {
+bool UserSet::preQuery() noexcept {
+    return true;
+}
+
+bool UserSet::query() noexcept {
     queryable = true;
     if (onQueryRemove != nullptr) {
         this->subsets.erase(std::string(onQueryRemove->name()));
         onQueryRemove = nullptr;
     }
-    menu().query(*this);
+    if (onQueryReplace) {
+        this->subsets.insert_or_assign(std::string(onQueryReplace->name()), std::move(onQueryReplace));
+    }
+
+    if (onQueryEnter != nullptr) {
+        while (onQueryEnter->query());
+        return queryable;
+    }
+    if (preQuery()) {
+        menu().query(*this);
+    }
     return queryable;
 }
 
@@ -56,7 +71,7 @@ const auto USER_SET_MENU = StaticMenu<UserSet, void>({
     {UserSet::EXIT_KEYWORD, {"Exit the program", &UserSet::exitProgram}}
 });
 
-const Menu<UserSet, void>& UserSet::menu() const {
+const Menu<UserSet, void>& UserSet::menu() const noexcept {
     return USER_SET_MENU;
 }
 
@@ -65,22 +80,22 @@ const auto USER_SET_SPECIFIC_BASE_MENU = StaticMenu<UserSet, void>({
     {UserSet::EXIT_KEYWORD, {"Exit the program", &UserSet::exitProgram}}
 });
 
-const Menu<UserSet, void>& UserSet::setSpecificMenu() const {
+const Menu<UserSet, void>& UserSet::setSpecificMenu() const noexcept {
     return USER_SET_SPECIFIC_BASE_MENU;
 }
 
-void UserSet::setSpecificOptions() {
+void UserSet::setSpecificOptions() noexcept {
     setSpecificQueryable = true;
     while (setSpecificQueryable) {
         setSpecificMenu().query(*this);
     }
 }
 
-void UserSet::exitSetSpecificOptions() {
+void UserSet::exitSetSpecificOptions() noexcept {
     setSpecificQueryable = false;
 }
 
-void UserSet::saveAllConnectedSubsets(void (UserSet::*saveMethod)(std::ostream& saveLocation) const, std::string_view defaultSaveLocation) const {
+void UserSet::saveAllConnectedSubsets(void (UserSet::*saveMethod)(std::ostream& saveLocation) const, std::string_view defaultSaveLocation) const noexcept {
     std::string saveLocation;
     std::cout << "Enter a location to save to\n"
               << "\"d\" will output to default location (\"" << defaultSaveLocation << "\", will be loaded automatically if the program is run in the same directory).\n"
@@ -108,7 +123,7 @@ void UserSet::saveAllConnectedSubsets(void (UserSet::*saveMethod)(std::ostream& 
     }
 }
 
-void UserSet::loadAllConnectedSubsets(void (UserSet::*loadMethod)(std::istream& loadLocation), std::string_view defaultLoadLocation) {
+void UserSet::loadAllConnectedSubsets(void (UserSet::*loadMethod)(std::istream& loadLocation), std::string_view defaultLoadLocation) noexcept {
     std::string loadLocation;
     std::cout << "Enter a location to load from\n"
               << "\"d\" will input from default location (\"" << defaultLoadLocation << "\", will be loaded automatically if the program is run in the same directory).\n"
@@ -136,15 +151,15 @@ void UserSet::loadAllConnectedSubsets(void (UserSet::*loadMethod)(std::istream& 
     }
 }
 
-void UserSet::saveHumanAllConnectedSubsets() {
+void UserSet::saveHumanAllConnectedSubsets() noexcept {
     saveAllConnectedSubsets(&UserSet::saveHumanSubsets, DEFAULT_HUMAN_LOCATION);
 }
 
-void UserSet::saveHumanSubsets(std::ostream& saveLocation) const {
+void UserSet::saveHumanSubsets(std::ostream& saveLocation) const noexcept {
     saveHumanSubsets_(saveLocation, 0);
 }
 
-void UserSet::saveHumanSubsets_(std::ostream& saveLocation, int indentation) const {
+void UserSet::saveHumanSubsets_(std::ostream& saveLocation, int indentation) const noexcept {
     saveLocation << std::string(indentation, ' ') << name() << " {\n"
                  << std::string(indentation + 2, ' ');
     auto* elems = elements();
@@ -171,15 +186,15 @@ void UserSet::saveHumanSubsets_(std::ostream& saveLocation, int indentation) con
                  << std::string(indentation, ' ') << "}\n";
 }
 
-void UserSet::saveMachineAllConnectedSubsets() {
+void UserSet::saveMachineAllConnectedSubsets() noexcept {
     saveAllConnectedSubsets(&UserSet::saveMachineSubsets, DEFAULT_MACHINE_LOCATION);
 }
 
-void UserSet::loadMachineAllConnectedSubsets() {
+void UserSet::loadMachineAllConnectedSubsets() noexcept {
     loadAllConnectedSubsets(&UserSet::loadMachineSubsets, DEFAULT_MACHINE_LOCATION);
 }
 
-void UserSet::saveMachineSubsets(std::ostream& saveLocation) const {
+void UserSet::saveMachineSubsets(std::ostream& saveLocation) const noexcept {
     saveLocation << type() << ' ' << name().size() << ' ' << name() << ' ';
     saveMachineSubset(saveLocation);
     saveLocation << '\n';
@@ -189,10 +204,10 @@ void UserSet::saveMachineSubsets(std::ostream& saveLocation) const {
     saveLocation << "0\n";
 }
 
-void UserSet::loadMachineSubsets_(std::istream& loadLocation) {
+void UserSet::loadMachineSubsets_(std::istream& loadLocation) noexcept {
     loadMachineSubset(loadLocation);
     
-    while (true) {
+    while (!loadFailed) {
         char type;
         loadLocation >> type;
         if (type == '0') {
@@ -211,21 +226,23 @@ void UserSet::loadMachineSubsets_(std::istream& loadLocation) {
             case WordSet::type_:
                 subsets[name] = std::make_unique<WordSet>(this, name);
                 break;
+            case FauxWordSet::type_:
+                subsets[name] = std::make_unique<FauxWordSet>(this, name);
+                break;
             case DirectorySet::type_:
                 subsets[name] = std::make_unique<DirectorySet>(this, name);
                 break;
             case GlobalSet::type_:
             default:
-                std::cout << "Failed to load subsets due to improper subset file format (global or unknown type in tree).\n";
-                throw std::logic_error("Partial load, load-resolveable unaccounted for. [Partial load due to global or unknown type]");
-                break;
+                loadFailed = true;
+                return;
         }
         subsets.at(name)->loadMachineSubsets_(loadLocation);
     }
 
 }
 
-void UserSet::loadMachineSubsets(std::istream& loadLocation) {
+void UserSet::loadMachineSubsets(std::istream& loadLocation) noexcept {
     char subtype;
     loadLocation >> subtype;
 
@@ -237,31 +254,38 @@ void UserSet::loadMachineSubsets(std::istream& loadLocation) {
     auto subsetName = std::string(subsetNameSize, '0');
     loadLocation.read(subsetName.data(), subsetNameSize);
     if (subtype != type() || subsetName != name()) {
-        std::string backupLocation = DEFAULT_MACHINE_LOCATION + ".bak";
-        std::ofstream backupFile(backupLocation);
-        backupFile << subtype << ' ' << subsetNameSize << ' ' << subsetName << ' ';
-        
-        std::ostringstream osstr;
-        loadLocation >> osstr.rdbuf();
-        std::string remainingContents = osstr.str();
-        
-        backupFile.write(remainingContents.data(), remainingContents.size());
-
+        loadFailed = true;
+    }
+    if (!loadFailed) {
+        subsets.clear();
+        loadMachineSubsets_(loadLocation);
+    }
+    if (loadFailed) {
         std::cout << "[IMPORTANT ERROR]\n"
                   << "[IMPORTANT ERROR]\n"
                   << "[IMPORTANT ERROR]\n"
-                  << "Failed to load subsets due to improper subset file format (mismatch type or name).\n"
-                  << "Backed up loaded data to '" << backupLocation << "'\n"
+                  << "Failed to load subsets due to improper subset file format.\n"
                   << "[IMPORTANT ERROR]\n"
                   << "[IMPORTANT ERROR]\n"
                   << "[IMPORTANT ERROR]\n";
-        return;
+        loadLocation.seekg(0);
+        if (loadLocation.tellg() == 0) {
+            std::string backupLocation = DEFAULT_MACHINE_LOCATION + ".bak";
+            std::ofstream backupFile(backupLocation);
+            std::ostringstream osstr;
+            loadLocation >> osstr.rdbuf();
+            std::string remainingContents = osstr.str();
+
+            backupFile.write(remainingContents.data(), remainingContents.size());
+
+            std::cout << "Backed up loaded data to '" << backupLocation << "'\n";
+        }
+        subsets.clear();
+        loadFailed = false;
     }
-    subsets.clear();
-    loadMachineSubsets_(loadLocation);
 }
 
-void UserSet::listSubsets() {
+void UserSet::listSubsets() noexcept {
     std::cout << "Subset list\n";
     std::cout << std::string(80, '-') << '\n';
     for (const auto& subsetKVP : subsets) {
@@ -270,7 +294,7 @@ void UserSet::listSubsets() {
     std::cout << std::string(80, '-') << '\n';
 }
 
-void UserSet::listElements() {
+void UserSet::listElements() noexcept {
     std::cout << "Element list\n";
     std::cout << std::string(80, '-') << '\n';
     if (elements() == nullptr) {
@@ -287,7 +311,7 @@ void UserSet::listElements() {
     std::cout << std::string(80, '-') << '\n';
 }
 
-void UserSet::createSubset() {
+void UserSet::createSubset() noexcept {
     std::string name;
 
     ignoreAll(std::cin);
@@ -311,7 +335,7 @@ void UserSet::createSubset() {
     subsets[name] = std::unique_ptr<UserSet>(subset);
 }
 
-void UserSet::deleteSubset() {
+void UserSet::deleteSubset() noexcept {
     std::string name;
     decltype(subsets)::iterator subsetIt;
 
@@ -333,7 +357,7 @@ void UserSet::deleteSubset() {
     subsets.erase(subsetIt);
 }
 
-void UserSet::enterSubset() {
+void UserSet::enterSubset() noexcept {
     std::string name;
     decltype(subsets)::iterator subsetIt;
     
@@ -355,11 +379,11 @@ void UserSet::enterSubset() {
     while (subsetIt->second->query());
 }
 
-void UserSet::moveUpHierarchy() {
+void UserSet::moveUpHierarchy() noexcept {
     queryable = false;
 }
 
-void UserSet::exitProgram() {
+void UserSet::exitProgram() noexcept {
     std::cout << "Do you want to save to default location before exiting? ('n' for no, anything else assumed yes): ";
     ignoreAll(std::cin);
     char c;
@@ -375,7 +399,7 @@ void UserSet::exitProgram() {
     exit(0);
 }
 
-bool UserSet::contains(const std::string& element) const {
+bool UserSet::contains(const std::string& element) const noexcept {
     if (elements() != nullptr) {
         return elements()->count(element) == 1;
     } else {
@@ -383,7 +407,7 @@ bool UserSet::contains(const std::string& element) const {
     }
 }
 
-void UserSet::removedElement(const std::string& element, bool expected) {
+void UserSet::removedElement(const std::string& element, bool expected) noexcept {
     for (const auto& subset : subsets) {
         subset.second->removedElement(element, expected);
     }

@@ -8,15 +8,33 @@
 #include "word-set.hpp"
 
 #include "helpers.hpp"
+#include "faux-word-set.hpp"
 
 #include <iostream>
 
-WordSet::WordSet(UserSet* parent, const std::string& name)
+WordSet::WordSet(UserSet* parent, const std::string& name) noexcept
     : SubSet(parent, name)
 {}
 
-UserSet* WordSet::createSet(UserSet& parent, const std::string& name) {
+UserSet* WordSet::createSet(UserSet& parent, const std::string& name) noexcept {
     return new WordSet(&parent, name);
+}
+
+char WordSet::type() const noexcept {
+    return isBecomingFaux ? FauxWordSet::type_ : WordSet::type_;
+}
+
+bool WordSet::preQuery() noexcept {
+    if (isBecomingFaux) {
+        queryable = false;
+        setSpecificQueryable = false;
+        auto parent_ = parent;
+        parent_->onQueryRemove = this;
+        parent_->onQueryReplace = std::make_unique<FauxWordSet>(std::move(*this));
+        parent_->onQueryEnter = parent_->onQueryReplace.get();
+        return false;
+    }
+    return true;
 }
 
 const auto WORD_SET_MENU = ReinterpretMenu<WordSet, UserSet, void>({
@@ -28,11 +46,11 @@ const auto WORD_SET_MENU = ReinterpretMenu<WordSet, UserSet, void>({
     {UserSet::EXIT_KEYWORD, {"Exit the program", &WordSet::exitProgram}}
 });
 
-const Menu<UserSet, void>& WordSet::setSpecificMenu() const {
+const Menu<UserSet, void>& WordSet::setSpecificMenu() const noexcept {
     return WORD_SET_MENU;
 }
 
-void WordSet::addWord() {
+void WordSet::addWord() noexcept {
     std::cout << "Specify a word you want to add to the set that exists in the parent set: ";
     std::string word;
     ignoreAll(std::cin);
@@ -48,7 +66,7 @@ void WordSet::addWord() {
     }
 }
 
-void WordSet::addParentWord() {
+void WordSet::addParentWord() noexcept {
     if (parent->elements() == nullptr) {
         std::cout << "The parent has an infinite set of elements and cannot be specified from\n";
         return;
@@ -80,10 +98,11 @@ void WordSet::addParentWord() {
             return;
         }
     }
-    throw std::logic_error("Unappearable [Should not be able to get a selection that does not exist in the parent set]");
+    std::cerr << "Impossible error: [Should not be able to get a selection that does not exist in the parent set]";
+    exitProgram();
 }
 
-void WordSet::removeWord() {
+void WordSet::removeWord() noexcept {
     std::cout << "Specify a word you want to remove from the set: ";
     std::string word;
     ignoreAll(std::cin);
@@ -92,7 +111,7 @@ void WordSet::removeWord() {
     removedElement(word, true);
 }
 
-void WordSet::removeContainedWord() {
+void WordSet::removeContainedWord() noexcept {
     if (elements_.size() == 0) {
         std::cout << "There are no words to select from to remove.\n";
         return;
@@ -119,17 +138,18 @@ void WordSet::removeContainedWord() {
             return;
         }
     }
-    throw std::logic_error("Unappearable [Should not be able to get a selection that does not exist in the parent set]");
+    std::cerr << "Impossible error: [Should not be able to get a selection that does not exist in the parent set]";
+    exitProgram();
 }
 
-void WordSet::saveMachineSubset(std::ostream& saveLocation) const {
+void WordSet::saveMachineSubset(std::ostream& saveLocation) const noexcept {
     saveLocation << elements()->size();
     for (const auto& element : *elements()) {
         saveLocation << ' ' << element.size() << ' ' << element;
     }
 }
 
-void WordSet::loadMachineSubset(std::istream& loadLocation) {
+void WordSet::loadMachineSubset(std::istream& loadLocation) noexcept {
     size_t elementCount;
     loadLocation >> elementCount;
     for (; elementCount > 0; --elementCount) {
@@ -142,27 +162,47 @@ void WordSet::loadMachineSubset(std::istream& loadLocation) {
         // reads all of the text into the element
         loadLocation.read(element.data(), elementSize);
         // if parent doesn't contain the element then issue a warning
-        if (!parent->contains(element)) {
-            throw std::logic_error("Partial load, load-resolveable unaccounted for. [WordSet parent element not found warning solveable]");
+        if (!parent->contains(element) && !isBecomingFaux) {
+            handleUnexpectedWordRemoval(element);
+            continue;
         }
         elements_.emplace(std::move(element));
     }
 }
 
-const std::set<std::string>* WordSet::elements() const {
+const std::set<std::string>* WordSet::elements() const noexcept {
     return &elements_;
 } 
 
-const std::set<std::string>* WordSet::complementElements() const {
-    return &NO_ELEMENTS;
+const std::set<std::string>* WordSet::complementElements() const noexcept {
+    return nullptr;
 }
 
-void WordSet::removedElement(const std::string& element, bool expected) {
+void WordSet::removedElement(const std::string& element, bool expected) noexcept {
     if (!expected) {
-        throw std::logic_error("Resolveable unaccounted for. [WordSet had a word removed unexpectedly]");
+        handleUnexpectedWordRemoval(element);
     }
     for (const auto& subset : subsets) {
         subset.second->removedElement(element, true);
     }
     elements_.erase(element);
+}
+
+void WordSet::handleUnexpectedWordRemoval(const std::string& element) noexcept {
+    std::cout << "The element '" << element << "' was attempted to be unexpectedly removed from the '" << name() << "' nested word set.\n"
+              << "you may either delete this element, exit the program without saving, or this word set can be substituted with an Faux-Wordset which allows faux non-subsetted words\n"
+              << "Enter [D] to delete the element, [E] to exit the program without saving, or [F] to substitute the WordSet with a Faux-WordSet: ";
+    std::string input;
+    do {
+        std::cin >> input;
+        if (std::toupper(input[0], std::locale()) == 'D') {
+            return;
+        } else if (std::toupper(input[0], std::locale()) == 'E') {
+            exit(0);
+        } else if (std::toupper(input[0], std::locale()) == 'F') {
+            isBecomingFaux = true;
+            elements_.insert(element);
+            return;
+        }
+    } while (true);
 }

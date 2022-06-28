@@ -14,46 +14,49 @@
 
 class UserSet {
     public:
-        UserSet() = default;
-        UserSet(UserSet* parent);
-        virtual ~UserSet() = default;
+        UserSet() noexcept = default;
+        UserSet(UserSet* parent) noexcept;
+        virtual ~UserSet() noexcept = default;
 
-        virtual std::string_view name() const = 0;
-        bool query();
+        virtual std::string_view name() const noexcept = 0;
+        virtual bool preQuery() noexcept;
+        bool query() noexcept;
 
-        void setSpecificOptions();
-        void exitSetSpecificOptions();
-        void saveHumanAllConnectedSubsets();
-        void saveMachineAllConnectedSubsets();
-        void loadMachineAllConnectedSubsets();
-        void listSubsets();
-        void listElements();
-        void createSubset();
-        void deleteSubset();
-        void enterSubset();
-        void moveUpHierarchy();
-        void exitProgram();
+        void setSpecificOptions() noexcept;
+        void exitSetSpecificOptions() noexcept;
+        void saveHumanAllConnectedSubsets() noexcept;
+        void saveMachineAllConnectedSubsets() noexcept;
+        void loadMachineAllConnectedSubsets() noexcept;
+        void listSubsets() noexcept;
+        void listElements() noexcept;
+        void createSubset() noexcept;
+        void deleteSubset() noexcept;
+        void enterSubset() noexcept;
+        void moveUpHierarchy() noexcept;
+        void exitProgram() noexcept;
 
-        virtual void saveMachineSubset(std::ostream& saveLocation) const = 0;
-        void saveMachineSubsets(std::ostream& saveLocation) const;
-        void saveHumanSubsets(std::ostream& saveLocation) const;
-        virtual void loadMachineSubset(std::istream& loadLocation) = 0;
-        void loadMachineSubsets(std::istream& loadLocation);
+        virtual void saveMachineSubset(std::ostream& saveLocation) const noexcept = 0;
+        void saveMachineSubsets(std::ostream& saveLocation) const noexcept;
+        void saveHumanSubsets(std::ostream& saveLocation) const noexcept;
+        virtual void loadMachineSubset(std::istream& loadLocation) noexcept = 0;
+        void loadMachineSubsets(std::istream& loadLocation) noexcept;
 
-        virtual char type() const = 0;
+        virtual char type() const noexcept = 0;
 
-        bool contains(const std::string& element) const;
-        virtual void removedElement(const std::string& element, bool expected);
-        virtual const std::set<std::string>* elements() const = 0;
-        virtual const std::set<std::string>* complementElements() const = 0;
+        bool contains(const std::string& element) const noexcept;
+        virtual void removedElement(const std::string& element, bool expected) noexcept;
+        virtual const std::set<std::string>* elements() const noexcept = 0;
+        virtual const std::set<std::string>* complementElements() const noexcept = 0;
 
         const static std::set<std::string> NO_ELEMENTS;
         const static std::string EXIT_KEYWORD;
         const static std::string DEFAULT_MACHINE_LOCATION;
         const static std::string DEFAULT_HUMAN_LOCATION;
-        static UserSet* EXIT_SET_MENU(UserSet&, const std::string&);
+        static UserSet* EXIT_SET_MENU(UserSet&, const std::string&) noexcept;
 
         UserSet* onQueryRemove = nullptr;
+        std::unique_ptr<UserSet> onQueryReplace;
+        UserSet* onQueryEnter = nullptr;
     protected:
         bool queryable = false;
         bool setSpecificQueryable = false;
@@ -61,15 +64,17 @@ class UserSet {
         std::map<std::string, std::unique_ptr<UserSet>> subsets;
 
     private:
-        const Menu<UserSet, void>& menu() const;
-        virtual const Menu<void, UserSet*, UserSet&, const std::string&>& createableSubsetMenu() const = 0;
-        virtual const Menu<UserSet, void>& setSpecificMenu() const;
+        const Menu<UserSet, void>& menu() const noexcept;
+        virtual const Menu<void, UserSet*, UserSet&, const std::string&>& createableSubsetMenu() const noexcept = 0;
+        virtual const Menu<UserSet, void>& setSpecificMenu() const noexcept;
 
-        void saveAllConnectedSubsets(void (UserSet::*saveMethod)(std::ostream& saveLocation) const, std::string_view defaultSaveLocation) const;
-        void loadAllConnectedSubsets(void (UserSet::*loadMethod)(std::istream& loadLocation), std::string_view defaultLoadLocation);
-        void saveSubsets(void (UserSet::*saveMethod)(std::ostream& saveLocation), std::ofstream& saveLocation) const;
-        void loadSubsets(void (UserSet::*loadMethod)(std::istream& loadLocation), std::ifstream& loadLocation);
+        void saveAllConnectedSubsets(void (UserSet::*saveMethod)(std::ostream& saveLocation) const, std::string_view defaultSaveLocation) const noexcept;
+        void loadAllConnectedSubsets(void (UserSet::*loadMethod)(std::istream& loadLocation), std::string_view defaultLoadLocation) noexcept;
+        void saveSubsets(void (UserSet::*saveMethod)(std::ostream& saveLocation), std::ofstream& saveLocation) const noexcept;
+        void loadSubsets(void (UserSet::*loadMethod)(std::istream& loadLocation), std::ifstream& loadLocation) noexcept;
 
-        void saveHumanSubsets_(std::ostream& saveLocation, int indentation) const;
-        void loadMachineSubsets_(std::istream& loadLocation);
+        bool loadFailed = false;
+
+        void saveHumanSubsets_(std::ostream& saveLocation, int indentation) const noexcept;
+        void loadMachineSubsets_(std::istream& loadLocation) noexcept;
 };

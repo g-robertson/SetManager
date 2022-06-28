@@ -10,18 +10,18 @@
 
 class GlobalSet : public UserSet {
     public:
-        std::string_view name() const override;
+        std::string_view name() const noexcept override;
 
         // #region UserSet public members override
         static constexpr char type_ = 'G';
-        char type() const override { return type_; }
+        char type() const noexcept override { return type_; }
 
-        void saveMachineSubset(std::ostream& saveLocation) const override;
-        void loadMachineSubset(std::istream& loadLocation) override;
+        void saveMachineSubset(std::ostream& saveLocation) const noexcept override;
+        void loadMachineSubset(std::istream& loadLocation) noexcept override;
 
-        const std::set<std::string>* elements() const override;
-        const std::set<std::string>* complementElements() const override;
+        const std::set<std::string>* elements() const noexcept override;
+        const std::set<std::string>* complementElements() const noexcept override;
         // #endregion
     private:
-        const Menu<void, UserSet*, UserSet&, const std::string&>& createableSubsetMenu() const override;
+        const Menu<void, UserSet*, UserSet&, const std::string&>& createableSubsetMenu() const noexcept override;
 };
