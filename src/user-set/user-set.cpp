@@ -1,3 +1,9 @@
+/*
+    user-set.cpp
+
+    UserSet is the most abstract type of set, containing all methods that are possible for all set types to have
+    It serves as the interface that all sets can interact with eachother with
+*/
 #include "user-set.hpp"
 
 #include "global-set.hpp"
@@ -128,7 +134,7 @@ void UserSet::saveHumanSubsets(std::ostream& saveLocation) const {
 }
 
 void UserSet::saveHumanSubsets_(std::ostream& saveLocation, int indentation) const {
-    saveLocation << std::string(indentation, ' ') << setName() << " {\n"
+    saveLocation << std::string(indentation, ' ') << name() << " {\n"
                  << std::string(indentation + 2, ' ');
     auto* elems = elements();
     if (elems == nullptr) {
@@ -165,7 +171,7 @@ bool UserSet::loadMachineAllConnectedSubsets() {
 }
 
 void UserSet::saveMachineSubsets(std::ostream& saveLocation) const {
-    saveLocation << setType() << ' ' << setName().size() << ' ' << setName() << ' ';
+    saveLocation << type() << ' ' << name().size() << ' ' << name() << ' ';
     saveMachineSubset(saveLocation);
     saveLocation << '\n';
     for (const auto& subset : subsets) {
@@ -193,13 +199,13 @@ void UserSet::loadMachineSubsets_(std::istream& loadLocation) {
         loadLocation.read(name.data(), nameSize);
 
         switch (type) {
-            case WordSet::setType_():
+            case WordSet::type_:
                 subsets[name] = std::make_unique<WordSet>(this, name);
                 break;
-            case DirectorySet::setType_():
+            case DirectorySet::type_:
                 subsets[name] = std::make_unique<DirectorySet>(this, name);
                 break;
-            case GlobalSet::setType_():
+            case GlobalSet::type_:
             default:
                 std::cout << "Failed to load subsets due to improper subset file format (global or unknown type in tree).\n";
                 throw std::logic_error("Partial load, resolveable unaccounted for. [Partial load due to global or unknown type]");
@@ -211,20 +217,20 @@ void UserSet::loadMachineSubsets_(std::istream& loadLocation) {
 }
 
 void UserSet::loadMachineSubsets(std::istream& loadLocation) {
-    char type;
-    loadLocation >> type;
+    char subtype;
+    loadLocation >> subtype;
 
-    int nameSize;
-    loadLocation >> nameSize;
+    int subsetNameSize;
+    loadLocation >> subsetNameSize;
 
     skipRead(loadLocation, 1);
 
-    auto name = std::string(nameSize, '0');
-    loadLocation.read(name.data(), nameSize);
-    if (type != setType() || name != setName()) {
+    auto subsetName = std::string(subsetNameSize, '0');
+    loadLocation.read(subsetName.data(), subsetNameSize);
+    if (subtype != type() || subsetName != name()) {
         std::string backupLocation = DEFAULT_MACHINE_LOCATION + ".bak";
         std::ofstream backupFile(backupLocation);
-        backupFile << type << ' ' << nameSize << ' ' << name << ' ';
+        backupFile << subtype << ' ' << subsetNameSize << ' ' << subsetName << ' ';
         
         std::ostringstream osstr;
         loadLocation >> osstr.rdbuf();

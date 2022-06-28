@@ -1,3 +1,9 @@
+/*
+    user-set.hpp
+
+    UserSet is the most abstract type of set, containing all methods that are possible for all set types to have
+    It serves as the interface that all sets can interact with eachother with
+*/
 #pragma once
 
 #include "menu.hpp"
@@ -12,7 +18,7 @@ class UserSet {
         UserSet(UserSet* parent);
         ~UserSet() = default;
 
-        virtual std::string_view setName() const = 0;
+        virtual std::string_view name() const = 0;
         bool query();
 
         bool setSpecificOptions();
@@ -33,7 +39,7 @@ class UserSet {
         virtual void loadMachineSubset(std::istream& loadLocation) = 0;
         void loadMachineSubsets(std::istream& loadLocation);
 
-        virtual char setType() const = 0;
+        virtual char type() const = 0;
 
         bool contains(const std::string& element) const;
         virtual void removedElement(const std::string& element);

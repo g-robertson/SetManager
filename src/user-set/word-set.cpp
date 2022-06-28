@@ -1,3 +1,10 @@
+/*
+    word-set.cpp
+
+    WordSet is a type of subset that can contain any element that exists in the parent UserSet by selection, or entering the word.
+
+    Due to its possibilities of being capable of dealing with all words arbitrarily in any parent set, it can have any UserSet type as its parent 
+*/
 #include "word-set.hpp"
 
 #include "helpers.hpp"

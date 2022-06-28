@@ -1,3 +1,11 @@
+/*
+    directory-set.cpp
+
+    DirectorySet is a type of subset that contains and mirrors the file names that are within a directory
+
+    Due to the subset mirroring a list of arbitrary words that would only coincidentally appear in other UserSets,
+    the only type of UserSet that a DirectorySet can have as a parent is the global set
+*/
 #include "directory-set.hpp"
 
 #include "helpers.hpp"

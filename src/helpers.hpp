@@ -1,3 +1,8 @@
+/*
+    helpers.hpp
+
+    Contains useful utilities to avoid having one-purpose files for simple things
+*/
 #pragma once
 
 #include <istream>

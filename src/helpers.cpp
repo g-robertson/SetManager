@@ -1,3 +1,8 @@
+/*
+    helpers.cpp
+
+    Contains useful utilities to avoid having one-purpose files for simple things
+*/
 #include "helpers.hpp"
 
 #include <stack>
