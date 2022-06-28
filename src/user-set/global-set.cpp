@@ -31,7 +31,7 @@ const auto GLOBAL_CREATEABLE_SUBSET_MENU = StaticMenu<void, UserSet*, UserSet&, 
     {std::string(1, WordSet::type_), {"WordSet", WordSet::createSet}},
     {std::string(1, DirectorySet::type_), {"DirectorySet", DirectorySet::createSet}},
     {UserSet::EXIT_KEYWORD, {"Exit", UserSet::EXIT_SET_MENU}}
-}, nullptr);
+});
 
 const Menu<void, UserSet*, UserSet&, const std::string&>& GlobalSet::createableSubsetMenu() const {
     return GLOBAL_CREATEABLE_SUBSET_MENU;

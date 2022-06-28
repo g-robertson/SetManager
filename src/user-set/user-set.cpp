@@ -33,10 +33,16 @@ UserSet::UserSet(UserSet* userSet)
 {}
 
 bool UserSet::query() {
-    return menu().query(*this);
+    queryable = true;
+    if (onQueryRemove != nullptr) {
+        this->subsets.erase(std::string(onQueryRemove->name()));
+        onQueryRemove = nullptr;
+    }
+    menu().query(*this);
+    return queryable;
 }
 
-const auto USER_SET_MENU = StaticMenu<UserSet, bool>({
+const auto USER_SET_MENU = StaticMenu<UserSet, void>({
     {"V", {"View set-specific options", &UserSet::setSpecificOptions}},
     {"H", {"Create a human-readable output of the subsets", &UserSet::saveHumanAllConnectedSubsets}},
     {"S", {"Save all connected subsets", &UserSet::saveMachineAllConnectedSubsets}},
@@ -48,24 +54,30 @@ const auto USER_SET_MENU = StaticMenu<UserSet, bool>({
     {"E", {"Enter a subset", &UserSet::enterSubset}},
     {"X", {"Move up one set hierarchy, or exit program if at top", &UserSet::moveUpHierarchy}},
     {UserSet::EXIT_KEYWORD, {"Exit the program", &UserSet::exitProgram}}
-}, true);
+});
 
-const Menu<UserSet, bool>& UserSet::menu() const {
+const Menu<UserSet, void>& UserSet::menu() const {
     return USER_SET_MENU;
 }
 
-const auto USER_SET_SPECIFIC_BASE_MENU = StaticMenu<UserSet, bool>({
-    {"X", {"Exit set-specific options", &UserSet::moveUpHierarchy}},
+const auto USER_SET_SPECIFIC_BASE_MENU = StaticMenu<UserSet, void>({
+    {"X", {"Exit set-specific options", &UserSet::exitSetSpecificOptions}},
     {UserSet::EXIT_KEYWORD, {"Exit the program", &UserSet::exitProgram}}
-}, true);
+});
 
-const Menu<UserSet, bool>& UserSet::setSpecificMenu() const {
+const Menu<UserSet, void>& UserSet::setSpecificMenu() const {
     return USER_SET_SPECIFIC_BASE_MENU;
 }
 
-bool UserSet::setSpecificOptions() {
-    while (setSpecificMenu().query(*this));
-    return true;
+void UserSet::setSpecificOptions() {
+    setSpecificQueryable = true;
+    while (setSpecificQueryable) {
+        setSpecificMenu().query(*this);
+    }
+}
+
+void UserSet::exitSetSpecificOptions() {
+    setSpecificQueryable = false;
 }
 
 void UserSet::saveAllConnectedSubsets(void (UserSet::*saveMethod)(std::ostream& saveLocation) const, std::string_view defaultSaveLocation) const {
@@ -124,9 +136,8 @@ void UserSet::loadAllConnectedSubsets(void (UserSet::*loadMethod)(std::istream& 
     }
 }
 
-bool UserSet::saveHumanAllConnectedSubsets() {
+void UserSet::saveHumanAllConnectedSubsets() {
     saveAllConnectedSubsets(&UserSet::saveHumanSubsets, DEFAULT_HUMAN_LOCATION);
-    return true;
 }
 
 void UserSet::saveHumanSubsets(std::ostream& saveLocation) const {
@@ -160,14 +171,12 @@ void UserSet::saveHumanSubsets_(std::ostream& saveLocation, int indentation) con
                  << std::string(indentation, ' ') << "}\n";
 }
 
-bool UserSet::saveMachineAllConnectedSubsets() {
+void UserSet::saveMachineAllConnectedSubsets() {
     saveAllConnectedSubsets(&UserSet::saveMachineSubsets, DEFAULT_MACHINE_LOCATION);
-    return true;
 }
 
-bool UserSet::loadMachineAllConnectedSubsets() {
+void UserSet::loadMachineAllConnectedSubsets() {
     loadAllConnectedSubsets(&UserSet::loadMachineSubsets, DEFAULT_MACHINE_LOCATION);
-    return true;
 }
 
 void UserSet::saveMachineSubsets(std::ostream& saveLocation) const {
@@ -252,17 +261,16 @@ void UserSet::loadMachineSubsets(std::istream& loadLocation) {
     loadMachineSubsets_(loadLocation);
 }
 
-bool UserSet::listSubsets() {
+void UserSet::listSubsets() {
     std::cout << "Subset list\n";
     std::cout << std::string(80, '-') << '\n';
     for (const auto& subsetKVP : subsets) {
         std::cout << subsetKVP.first << '\n';
     }
     std::cout << std::string(80, '-') << '\n';
-    return true;
 }
 
-bool UserSet::listElements() {
+void UserSet::listElements() {
     std::cout << "Element list\n";
     std::cout << std::string(80, '-') << '\n';
     if (elements() == nullptr) {
@@ -277,10 +285,9 @@ bool UserSet::listElements() {
         }
     }
     std::cout << std::string(80, '-') << '\n';
-    return true;
 }
 
-bool UserSet::createSubset() {
+void UserSet::createSubset() {
     std::string name;
 
     ignoreAll(std::cin);
@@ -291,7 +298,7 @@ bool UserSet::createSubset() {
         std::cout << "Enter a name for the subset or \"" << UserSet::EXIT_KEYWORD << "\" to exit: ";
         std::getline(std::cin, name);
         if (insensitiveSame(name, UserSet::EXIT_KEYWORD)) {
-            return true;
+            return;
         }
     } while (subsets.find(name) != subsets.end());
 
@@ -299,13 +306,12 @@ bool UserSet::createSubset() {
 
     auto* subset = createableSubsetMenu().query(*this, name);
     if (subset == nullptr) {
-        return true;
+        return;
     }
     subsets[name] = std::unique_ptr<UserSet>(subset);
-    return true;
 }
 
-bool UserSet::deleteSubset() {
+void UserSet::deleteSubset() {
     std::string name;
     decltype(subsets)::iterator subsetIt;
 
@@ -319,16 +325,15 @@ bool UserSet::deleteSubset() {
         std::cout << "Enter the name of the list that you want to enter (case-sensitive) or \"" << UserSet::EXIT_KEYWORD << "\" to exit: ";
         std::getline(std::cin, name);
         if (insensitiveSame(name, UserSet::EXIT_KEYWORD)) {
-            return true;
+            return;
         }
         subsetIt = subsets.find(name);
     } while (subsetIt == subsets.end());
 
     subsets.erase(subsetIt);
-    return true;
 }
 
-bool UserSet::enterSubset() {
+void UserSet::enterSubset() {
     std::string name;
     decltype(subsets)::iterator subsetIt;
     
@@ -342,20 +347,19 @@ bool UserSet::enterSubset() {
         std::cout << "Enter the name of the list that you want to enter (case-sensitive) or \"" << UserSet::EXIT_KEYWORD << "\" to exit: ";
         std::getline(std::cin, name);
         if (insensitiveSame(name, UserSet::EXIT_KEYWORD)) {
-            return true;
+            return;
         }
         subsetIt = subsets.find(name);
     } while (subsetIt == subsets.end());
 
     while (subsetIt->second->query());
-    return true;
 }
 
-bool UserSet::moveUpHierarchy() {
-    return false;
+void UserSet::moveUpHierarchy() {
+    queryable = false;
 }
 
-bool UserSet::exitProgram() {
+void UserSet::exitProgram() {
     std::cout << "Do you want to save to default location before exiting? ('n' for no, anything else assumed yes): ";
     ignoreAll(std::cin);
     char c;

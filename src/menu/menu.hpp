@@ -24,8 +24,8 @@ template <typename TClass, typename TReturn, typename... TArgs>
 class StaticMenu : public Menu<TClass, TReturn, TArgs...> {
     public:
         using optionType = std::pair<std::string, TReturn (TClass::*)(TArgs...)>;
-        StaticMenu(const std::list<std::pair<std::string, optionType>>& optionList, TReturn throwResult)
-            : Menu<TClass, TReturn, TArgs...>(), throwResult(throwResult)
+        StaticMenu(const std::list<std::pair<std::string, optionType>>& optionList)
+            : Menu<TClass, TReturn, TArgs...>()
         {
             for (const auto& optionKVP : optionList) {
                 std::string optionName = optionKVP.first;
@@ -55,11 +55,7 @@ class StaticMenu : public Menu<TClass, TReturn, TArgs...> {
 
                 const auto& selectedMenuOptionKVP = optionMap_.find(input);
                 if (selectedMenuOptionKVP != optionMap_.end()) {
-                    try {
-                        return (object.*(selectedMenuOptionKVP->second.second))(std::forward<TArgs>(args)...);
-                    } catch (...) {
-                        return throwResult;
-                    }
+                    return (object.*(selectedMenuOptionKVP->second.second))(std::forward<TArgs>(args)...);
                 }
             }
         }
@@ -67,15 +63,14 @@ class StaticMenu : public Menu<TClass, TReturn, TArgs...> {
     private:
         std::map<std::string, optionType> optionMap_;
         std::list<typename decltype(optionMap_)::iterator> optionList_;
-        TReturn throwResult;
 };
 
 template <typename TReturn, typename... TArgs>
 class StaticMenu<void, TReturn, TArgs...> : public Menu<void, TReturn, TArgs...> {
     public:
         using optionType = std::pair<std::string, TReturn (*)(TArgs...)>;
-        StaticMenu(const std::list<std::pair<std::string, optionType>>& optionList, TReturn throwResult)
-            : Menu<void, TReturn, TArgs...>(), throwResult(throwResult)
+        StaticMenu(const std::list<std::pair<std::string, optionType>>& optionList)
+            : Menu<void, TReturn, TArgs...>()
         {
             for (const auto& optionKVP : optionList) {
                 std::string optionName = optionKVP.first;
@@ -105,26 +100,21 @@ class StaticMenu<void, TReturn, TArgs...> : public Menu<void, TReturn, TArgs...>
 
                 const auto& selectedMenuOptionKVP = optionMap_.find(input);
                 if (selectedMenuOptionKVP != optionMap_.end()) {
-                    try {
-                        return selectedMenuOptionKVP->second.second(std::forward<TArgs>(args)...);
-                    } catch (...) {
-                        return throwResult;
-                    }
+                    return selectedMenuOptionKVP->second.second(std::forward<TArgs>(args)...);
                 }
             }
         }
     private:
         std::map<std::string, optionType> optionMap_;
         std::list<typename decltype(optionMap_)::iterator> optionList_;
-        TReturn throwResult;
 };
 
 template <typename TDerived, typename TClass, typename TReturn, typename... TArgs>
 class ReinterpretMenu : public Menu<TClass, TReturn, TArgs...> {
     public:
         using optionType = std::pair<std::string, TReturn (TDerived::*)(TArgs...)>;
-        ReinterpretMenu(const std::list<std::pair<std::string, optionType>>& optionList, TReturn throwResult)
-            : Menu<TClass, TReturn, TArgs...>(), throwResult(throwResult)
+        ReinterpretMenu(const std::list<std::pair<std::string, optionType>>& optionList)
+            : Menu<TClass, TReturn, TArgs...>()
         {
             for (const auto& optionKVP : optionList) {
                 std::string optionName = optionKVP.first;
@@ -154,16 +144,11 @@ class ReinterpretMenu : public Menu<TClass, TReturn, TArgs...> {
 
                 const auto& selectedMenuOptionKVP = optionMap_.find(input);
                 if (selectedMenuOptionKVP != optionMap_.end()) {
-                    try {
-                        return (reinterpret_cast<TDerived&>(object).*(selectedMenuOptionKVP->second.second))(std::forward<TArgs>(args)...);
-                    } catch (...) {
-                        return throwResult;
-                    }
+                    return (reinterpret_cast<TDerived&>(object).*(selectedMenuOptionKVP->second.second))(std::forward<TArgs>(args)...);
                 }
             }
         }
     private:
         std::map<std::string, optionType> optionMap_;
         std::list<typename decltype(optionMap_)::iterator> optionList_;
-        TReturn throwResult;
 };

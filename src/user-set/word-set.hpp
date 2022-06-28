@@ -27,15 +27,15 @@ class WordSet : public SubSet {
         const std::set<std::string>* complementElements() const override;
         // #endregion 
 
-        bool addWord();
-        bool addParentWord();
-        bool removeWord();
-        bool removeContainedWord();
+        void addWord();
+        void addParentWord();
+        void removeWord();
+        void removeContainedWord();
 
         void removedElement(const std::string& element, bool expected) override;
     private:
         // #region UserSet private members override 
-        const Menu<UserSet, bool>& setSpecificMenu() const override;
+        const Menu<UserSet, void>& setSpecificMenu() const override;
         // #endregion 
 
         std::set<std::string> elements_;

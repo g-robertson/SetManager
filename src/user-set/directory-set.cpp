@@ -39,26 +39,39 @@ UserSet* DirectorySet::createSet(UserSet& parent, const std::string& name) {
     }
 }
 
-const auto DIRECTORY_SET_MENU = ReinterpretMenu<DirectorySet, UserSet, bool>({
+const auto DIRECTORY_SET_MENU = ReinterpretMenu<DirectorySet, UserSet, void>({
     {"LD", {"List mirrored directory", &DirectorySet::listMirroredDirectory}},
     {"U", {"Update mirrored directory contents", &DirectorySet::updateDirectory}},
-    {"X", {"Exit set-specific options", &DirectorySet::moveUpHierarchy}},
+    {"X", {"Exit set-specific options", &DirectorySet::exitSetSpecificOptions}},
     {UserSet::EXIT_KEYWORD, {"Exit the program", &DirectorySet::exitProgram}}
-}, true);
+});
 
-const Menu<UserSet, bool>& DirectorySet::setSpecificMenu() const {
+const Menu<UserSet, void>& DirectorySet::setSpecificMenu() const {
     return DIRECTORY_SET_MENU;
 }
 
-bool DirectorySet::updateDirectory() {
-    if (!std::filesystem::is_directory(directory_)) {
-        throw std::logic_error("Unresolveable, Directory set created on directory that does not exist.");
-    }
+void DirectorySet::updateDirectory() {
     std::set<std::string> newElements;
-    for (const auto& entry : std::filesystem::directory_iterator(directory_)) {
-        newElements.insert(entry.path().lexically_relative(directory_).string());
+    try {
+        if (!std::filesystem::is_directory(directory_)) {
+            throw std::logic_error("Unresolveable, Directory set created on directory that does not exist.");
+        }
+        for (const auto& entry : std::filesystem::directory_iterator(directory_)) {
+            newElements.insert(entry.path().lexically_relative(directory_).string());
+        }
+    } catch (...) {
+        std::cout << "The directory is unaccessible,\n"
+                  << "you may either delete this set as a result of this, or the program can continue running with the previously gathered directory contents\n"
+                  << "Enter [D] to delete, or anything else to continue: ";
+        std::string input;
+        std::cin >> input;
+        if (std::toupper(input[0], std::locale()) == 'D') {
+            parent->onQueryRemove = this;
+            queryable = false;
+            setSpecificQueryable = false;
+        }
+        return;
     }
-
     for (const auto& element : elements_) {
         if (newElements.find(element) == newElements.end()) {
             removedElement(element, false);
@@ -66,12 +79,10 @@ bool DirectorySet::updateDirectory() {
     }
 
     elements_ = std::move(newElements);
-    return true;
 }
 
-bool DirectorySet::listMirroredDirectory() {
+void DirectorySet::listMirroredDirectory() {
     std::cout << directory() << '\n';
-    return true;
 }
 
 const std::set<std::string>* DirectorySet::elements() const {

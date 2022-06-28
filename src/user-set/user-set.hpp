@@ -21,17 +21,18 @@ class UserSet {
         virtual std::string_view name() const = 0;
         bool query();
 
-        bool setSpecificOptions();
-        bool saveHumanAllConnectedSubsets();
-        bool saveMachineAllConnectedSubsets();
-        bool loadMachineAllConnectedSubsets();
-        bool listSubsets();
-        bool listElements();
-        bool createSubset();
-        bool deleteSubset();
-        bool enterSubset();
-        bool moveUpHierarchy();
-        bool exitProgram();
+        void setSpecificOptions();
+        void exitSetSpecificOptions();
+        void saveHumanAllConnectedSubsets();
+        void saveMachineAllConnectedSubsets();
+        void loadMachineAllConnectedSubsets();
+        void listSubsets();
+        void listElements();
+        void createSubset();
+        void deleteSubset();
+        void enterSubset();
+        void moveUpHierarchy();
+        void exitProgram();
 
         virtual void saveMachineSubset(std::ostream& saveLocation) const = 0;
         void saveMachineSubsets(std::ostream& saveLocation) const;
@@ -51,14 +52,18 @@ class UserSet {
         const static std::string DEFAULT_MACHINE_LOCATION;
         const static std::string DEFAULT_HUMAN_LOCATION;
         static UserSet* EXIT_SET_MENU(UserSet&, const std::string&);
+
+        UserSet* onQueryRemove = nullptr;
     protected:
+        bool queryable = false;
+        bool setSpecificQueryable = false;
         UserSet* parent;
         std::map<std::string, std::unique_ptr<UserSet>> subsets;
 
     private:
-        const Menu<UserSet, bool>& menu() const;
+        const Menu<UserSet, void>& menu() const;
         virtual const Menu<void, UserSet*, UserSet&, const std::string&>& createableSubsetMenu() const = 0;
-        virtual const Menu<UserSet, bool>& setSpecificMenu() const;
+        virtual const Menu<UserSet, void>& setSpecificMenu() const;
 
         void saveAllConnectedSubsets(void (UserSet::*saveMethod)(std::ostream& saveLocation) const, std::string_view defaultSaveLocation) const;
         void loadAllConnectedSubsets(void (UserSet::*loadMethod)(std::istream& loadLocation), std::string_view defaultLoadLocation);

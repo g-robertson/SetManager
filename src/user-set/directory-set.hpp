@@ -31,13 +31,13 @@ class DirectorySet : public SubSet {
         const std::set<std::string>* complementElements() const override;
         // #endregion 
 
-        bool updateDirectory();
-        bool listMirroredDirectory();
+        void updateDirectory();
+        void listMirroredDirectory();
 
         std::string_view directory() const;
     private:
         // #region UserSet private members override 
-        const Menu<UserSet, bool>& setSpecificMenu() const override;
+        const Menu<UserSet, void>& setSpecificMenu() const override;
         // #endregion 
 
         bool isMirroring = false;
