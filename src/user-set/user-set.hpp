@@ -16,7 +16,7 @@ class UserSet {
     public:
         UserSet() = default;
         UserSet(UserSet* parent);
-        ~UserSet() = default;
+        virtual ~UserSet() = default;
 
         virtual std::string_view name() const = 0;
         bool query();
