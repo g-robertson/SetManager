@@ -19,8 +19,9 @@ class DerivativeSet : public SubSet {
         const std::unordered_map<std::string, UserSet*>& derivesFrom() const noexcept;
         bool postParentLoad() noexcept override;
         virtual bool postPostParentLoad() noexcept;
-    private:
+    protected:
         std::unordered_map<std::string, UserSet*> derivesFrom_;
+    private:
         bool postParentLoading = false;
         bool postParentLoaded = false;
 }; 
