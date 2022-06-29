@@ -196,6 +196,13 @@ void UserSet::loadMachineAllConnectedSubsets() noexcept {
 }
 
 void UserSet::saveMachineSubsets(std::ostream& saveLocation) const noexcept {
+    if (onQueryReplace) {
+        subsets.insert_or_assign(onQueryReplace->name(), std::move(onQueryReplace));
+    }
+    if (onQueryRemove != nullptr) {
+        subsets.erase(onQueryRemove->name());
+        onQueryRemove = nullptr;
+    }
     saveLocation << type() << ' ' << name().size() << ' ' << name() << ' ';
     saveMachineSubset(saveLocation);
     saveLocation << '\n';
