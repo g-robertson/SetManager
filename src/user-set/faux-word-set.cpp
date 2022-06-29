@@ -137,7 +137,7 @@ void FauxWordSet::listFauxElements() noexcept {
     std::cout << std::string(80, '-') << '\n';
 }
 
-void FauxWordSet::saveMachineSubset(std::ostream& saveLocation) const noexcept {
+void FauxWordSet::saveMachineSubset(std::ostream& saveLocation) noexcept {
     saveLocation << elements_.size();
     for (const auto& element : elements_) {
         saveLocation << ' ' << element.size() << ' ' << element;

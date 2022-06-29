@@ -14,7 +14,7 @@ std::string_view GlobalSet::name() const noexcept {
     return "GLOBAL";
 }
 
-void GlobalSet::saveMachineSubset(std::ostream&) const noexcept {
+void GlobalSet::saveMachineSubset(std::ostream&) noexcept {
 }
 
 void GlobalSet::loadMachineSubset(std::istream&) noexcept {

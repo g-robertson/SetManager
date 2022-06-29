@@ -106,7 +106,7 @@ void DirectorySet::handleDirectoryError() noexcept {
     }
 }
 
-void DirectorySet::saveMachineSubset(std::ostream& saveLocation) const noexcept {
+void DirectorySet::saveMachineSubset(std::ostream& saveLocation) noexcept {
     std::string_view directoryString = directory_.c_str();
     saveLocation << directoryString.size() << ' ' << directoryString;
 }

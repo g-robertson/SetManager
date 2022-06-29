@@ -96,7 +96,7 @@ void UserSet::exitSetSpecificOptions() noexcept {
     setSpecificQueryable = false;
 }
 
-void UserSet::saveAllConnectedSubsets(void (UserSet::*saveMethod)(std::ostream& saveLocation) const, std::string_view defaultSaveLocation) const noexcept {
+void UserSet::saveAllConnectedSubsets(void (UserSet::*saveMethod)(std::ostream& saveLocation), std::string_view defaultSaveLocation) noexcept {
     std::string saveLocation;
     std::cout << "Enter a location to save to\n"
               << "\"d\" will output to default location (\"" << defaultSaveLocation << "\", will be loaded automatically if the program is run in the same directory).\n"
@@ -109,7 +109,7 @@ void UserSet::saveAllConnectedSubsets(void (UserSet::*saveMethod)(std::ostream& 
         return;
     }
     
-    const UserSet* globalSet = this;
+    UserSet* globalSet = this;
     while (globalSet->parent != nullptr) {
         globalSet = globalSet-> parent;
     }
@@ -156,11 +156,11 @@ void UserSet::saveHumanAllConnectedSubsets() noexcept {
     saveAllConnectedSubsets(&UserSet::saveHumanSubsets, DEFAULT_HUMAN_LOCATION);
 }
 
-void UserSet::saveHumanSubsets(std::ostream& saveLocation) const noexcept {
+void UserSet::saveHumanSubsets(std::ostream& saveLocation) noexcept {
     saveHumanSubsets_(saveLocation, 0);
 }
 
-void UserSet::saveHumanSubsets_(std::ostream& saveLocation, int indentation) const noexcept {
+void UserSet::saveHumanSubsets_(std::ostream& saveLocation, int indentation) noexcept {
     saveLocation << std::string(indentation, ' ') << name() << " {\n"
                  << std::string(indentation + 2, ' ');
     auto* elems = elements();
@@ -195,12 +195,12 @@ void UserSet::loadMachineAllConnectedSubsets() noexcept {
     loadAllConnectedSubsets(&UserSet::loadMachineSubsets, DEFAULT_MACHINE_LOCATION);
 }
 
-void UserSet::saveMachineSubsets(std::ostream& saveLocation) const noexcept {
+void UserSet::saveMachineSubsets(std::ostream& saveLocation) noexcept {
     if (onQueryReplace) {
-        subsets.insert_or_assign(onQueryReplace->name(), std::move(onQueryReplace));
+        subsets.insert_or_assign(std::string(onQueryReplace->name()), std::move(onQueryReplace));
     }
     if (onQueryRemove != nullptr) {
-        subsets.erase(onQueryRemove->name());
+        subsets.erase(std::string(onQueryRemove->name()));
         onQueryRemove = nullptr;
     }
     saveLocation << type() << ' ' << name().size() << ' ' << name() << ' ';
@@ -216,10 +216,10 @@ bool UserSet::loadMachineSubsets_(std::istream& loadLocation) noexcept {
     loadMachineSubset(loadLocation);
     while (!loadFailed) {
         if (onQueryRemove != nullptr) {
-            subsets.erase(onQueryRemove->name());
+            subsets.erase(std::string(onQueryRemove->name()));
         }
         if (onQueryReplace) {
-            subsets.insert_or_assign(onQueryReplace->name(), std::move(onQueryReplace));
+            subsets.insert_or_assign(std::string(onQueryReplace->name()), std::move(onQueryReplace));
         }
         char type;
         loadLocation >> type;
@@ -402,7 +402,7 @@ void UserSet::exitProgram() noexcept {
     std::cin.get(c);
     if (std::tolower(c) != 'n') {
         std::ofstream defaultLocation(UserSet::DEFAULT_MACHINE_LOCATION);
-        const UserSet* global = this;
+        UserSet* global = this;
         while (global->parent != nullptr) {
             global = global->parent;
         }

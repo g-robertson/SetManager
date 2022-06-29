@@ -18,9 +18,9 @@ class WordSet : public SubSet {
         // #endregion 
         // #region UserSet public members override 
         static constexpr char type_ = 'W';
-        char type() const noexcept override;
+        char type() const noexcept override { return type_; }
 
-        void saveMachineSubset(std::ostream& saveLocation) const noexcept override;
+        void saveMachineSubset(std::ostream& saveLocation) noexcept override;
         void loadMachineSubset(std::istream& loadLocation) noexcept override;
 
         const std::set<std::string>* elements() const noexcept override;
@@ -32,7 +32,6 @@ class WordSet : public SubSet {
         void removeWord() noexcept;
         void removeContainedWord() noexcept;
 
-        bool preQuery() noexcept override;
         void removedElement(const std::string& element, bool expected) noexcept override;
     private:
         // #region UserSet private members override 

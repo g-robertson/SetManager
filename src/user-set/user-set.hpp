@@ -35,9 +35,9 @@ class UserSet {
         void moveUpHierarchy() noexcept;
         void exitProgram() noexcept;
 
-        virtual void saveMachineSubset(std::ostream& saveLocation) const noexcept = 0;
-        void saveMachineSubsets(std::ostream& saveLocation) const noexcept;
-        void saveHumanSubsets(std::ostream& saveLocation) const noexcept;
+        virtual void saveMachineSubset(std::ostream& saveLocation) noexcept = 0;
+        void saveMachineSubsets(std::ostream& saveLocation) noexcept;
+        void saveHumanSubsets(std::ostream& saveLocation) noexcept;
         virtual void loadMachineSubset(std::istream& loadLocation) noexcept = 0;
         void loadMachineSubsets(std::istream& loadLocation) noexcept;
 
@@ -68,13 +68,13 @@ class UserSet {
         virtual const Menu<void, UserSet*, UserSet&, const std::string&>& createableSubsetMenu() const noexcept = 0;
         virtual const Menu<UserSet, void>& setSpecificMenu() const noexcept;
 
-        void saveAllConnectedSubsets(void (UserSet::*saveMethod)(std::ostream& saveLocation) const, std::string_view defaultSaveLocation) const noexcept;
+        void saveAllConnectedSubsets(void (UserSet::*saveMethod)(std::ostream& saveLocation), std::string_view defaultSaveLocation) noexcept;
         void loadAllConnectedSubsets(void (UserSet::*loadMethod)(std::istream& loadLocation), std::string_view defaultLoadLocation) noexcept;
         void saveSubsets(void (UserSet::*saveMethod)(std::ostream& saveLocation), std::ofstream& saveLocation) const noexcept;
         void loadSubsets(void (UserSet::*loadMethod)(std::istream& loadLocation), std::ifstream& loadLocation) noexcept;
 
         bool loadFailed = false;
 
-        void saveHumanSubsets_(std::ostream& saveLocation, int indentation) const noexcept;
+        void saveHumanSubsets_(std::ostream& saveLocation, int indentation) noexcept;
         bool loadMachineSubsets_(std::istream& loadLocation) noexcept;
 };

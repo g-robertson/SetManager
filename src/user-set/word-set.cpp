@@ -20,23 +20,6 @@ UserSet* WordSet::createSet(UserSet& parent, const std::string& name) noexcept {
     return new WordSet(&parent, name);
 }
 
-char WordSet::type() const noexcept {
-    return isBecomingFaux ? FauxWordSet::type_ : WordSet::type_;
-}
-
-bool WordSet::preQuery() noexcept {
-    if (isBecomingFaux) {
-        queryable = false;
-        setSpecificQueryable = false;
-        auto parent_ = parent;
-        parent_->onQueryRemove = this;
-        parent_->onQueryReplace = std::make_unique<FauxWordSet>(std::move(*this));
-        parent_->onQueryEnter = parent_->onQueryReplace.get();
-        return false;
-    }
-    return true;
-}
-
 const auto WORD_SET_MENU = ReinterpretMenu<WordSet, UserSet, void>({
     {"A", {"Add a word", &WordSet::addWord}},
     {"AX", {"Add a word from the parent set", &WordSet::addParentWord}},
@@ -142,7 +125,7 @@ void WordSet::removeContainedWord() noexcept {
     exitProgram();
 }
 
-void WordSet::saveMachineSubset(std::ostream& saveLocation) const noexcept {
+void WordSet::saveMachineSubset(std::ostream& saveLocation) noexcept {
     saveLocation << elements()->size();
     for (const auto& element : *elements()) {
         saveLocation << ' ' << element.size() << ' ' << element;
@@ -201,6 +184,7 @@ void WordSet::handleUnexpectedWordRemoval(const std::string& element) noexcept {
             exit(0);
         } else if (std::toupper(input[0], std::locale()) == 'F') {
             isBecomingFaux = true;
+            parent->onQueryReplace = std::make_unique<FauxWordSet>(std::move(*this));
             elements_.insert(element);
             return;
         }

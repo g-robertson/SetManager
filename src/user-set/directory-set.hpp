@@ -24,7 +24,7 @@ class DirectorySet : public SubSet {
         static constexpr char type_ = 'D';
         char type() const noexcept override { return type_; }
 
-        void saveMachineSubset(std::ostream& saveLocation) const noexcept override;
+        void saveMachineSubset(std::ostream& saveLocation) noexcept override;
         void loadMachineSubset(std::istream& loadLocation) noexcept override;
 
         const std::set<std::string>* elements() const noexcept override;
