@@ -21,4 +21,6 @@ class DerivativeSet : public SubSet {
         virtual bool postPostParentLoad() noexcept;
     private:
         std::unordered_map<std::string, UserSet*> derivesFrom_;
+        bool postParentLoading = false;
+        bool postParentLoaded = false;
 }; 

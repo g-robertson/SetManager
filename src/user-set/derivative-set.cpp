@@ -16,11 +16,22 @@ const std::unordered_map<std::string, UserSet*>& DerivativeSet::derivesFrom() co
 }
 
 bool DerivativeSet::postParentLoad() noexcept {
+    if (postParentLoaded) {
+        return false;
+    }
+    if (postParentLoading) {
+        std::cout << "Recursive parent loading detected\n";
+        return true;
+    }
+
+    postParentLoading = true;
     for (auto& subset : derivesFrom()) {
         if (subset.second->postParentLoad()) {
             return true;
         }
     }
+    postParentLoading = false;
+    postParentLoaded = true;
     return postPostParentLoad();
 }
 
