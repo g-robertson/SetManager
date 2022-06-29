@@ -5,4 +5,6 @@ target_sources(SetManager
     PRIVATE word-set.cpp
     PRIVATE faux-word-set.cpp
     PRIVATE directory-set.cpp
+
+    PRIVATE derivative-set.cpp
 )
