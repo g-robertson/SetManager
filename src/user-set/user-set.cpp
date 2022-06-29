@@ -37,7 +37,7 @@ bool UserSet::preQuery() noexcept {
     return true;
 }
 
-bool UserSet::postLoad() noexcept {
+bool UserSet::postParentLoad() noexcept {
     return false;
 }
 
@@ -246,7 +246,7 @@ bool UserSet::loadMachineSubsets_(std::istream& loadLocation) noexcept {
         loadFailed = subsets.at(name)->loadMachineSubsets_(loadLocation);
     }
     for (const auto& subset : subsets) {
-        if (subset.second->postLoad()) {
+        if (subset.second->postParentLoad()) {
             return true;
         }
     }
