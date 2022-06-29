@@ -215,6 +215,12 @@ void UserSet::saveMachineSubsets(std::ostream& saveLocation) const noexcept {
 bool UserSet::loadMachineSubsets_(std::istream& loadLocation) noexcept {
     loadMachineSubset(loadLocation);
     while (!loadFailed) {
+        if (onQueryRemove != nullptr) {
+            subsets.erase(onQueryRemove->name());
+        }
+        if (onQueryReplace) {
+            subsets.insert_or_assign(onQueryReplace->name(), std::move(onQueryReplace));
+        }
         char type;
         loadLocation >> type;
         if (type == '0') {
