@@ -225,6 +225,14 @@ void UserSet::saveMachineSubsets(std::ostream& saveLocation) noexcept {
     saveLocation << '\n';
     for (const auto& subset : subsets) {
         subset.second->saveMachineSubsets(saveLocation);
+
+        if (onQueryReplace) {
+            subsets.insert_or_assign(std::string(onQueryReplace->name()), std::move(onQueryReplace));
+        }
+        if (onQueryRemove != nullptr) {
+            subsets.erase(std::string(onQueryRemove->name()));
+            onQueryRemove = nullptr;
+    }
     }
     saveLocation << "0\n";
 }
