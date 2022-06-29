@@ -20,6 +20,7 @@ class UserSet {
 
         virtual std::string_view name() const noexcept = 0;
         virtual bool preQuery() noexcept;
+        virtual bool postLoad() noexcept;
         bool query() noexcept;
 
         void setSpecificOptions() noexcept;
