@@ -9,6 +9,8 @@
 
 #include "subset.hpp"
 
+#include "faux-word-set.hpp"
+
 class WordSet : public SubSet {
     public:
         WordSet(UserSet* parent, const std::string& name) noexcept;
@@ -42,6 +44,6 @@ class WordSet : public SubSet {
 
         std::set<std::string> elements_;
 
-        bool isBecomingFaux = false;
+        FauxWordSet* becomingFaux = nullptr;
         friend class FauxWordSet;
 }; 

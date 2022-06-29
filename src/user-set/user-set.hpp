@@ -55,7 +55,7 @@ class UserSet {
         static UserSet* EXIT_SET_MENU(UserSet&, const std::string&) noexcept;
 
         UserSet* onQueryRemove = nullptr;
-        std::unique_ptr<UserSet> onQueryReplace;
+        std::unique_ptr<UserSet> onQueryAdd;
         UserSet* onQueryEnter = nullptr;
     protected:
         bool queryable = false;
@@ -77,4 +77,6 @@ class UserSet {
 
         void saveHumanSubsets_(std::ostream& saveLocation, int indentation) noexcept;
         bool loadMachineSubsets_(std::istream& loadLocation) noexcept;
+
+        void onQuery() noexcept;
 };

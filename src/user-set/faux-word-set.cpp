@@ -9,6 +9,7 @@
 #include "faux-word-set.hpp"
 
 #include "helpers.hpp"
+#include "word-set.hpp"
 
 #include <iostream>
 #include <algorithm>

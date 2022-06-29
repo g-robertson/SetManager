@@ -10,7 +10,7 @@
 
 #include "subset.hpp"
 
-#include "word-set.hpp"
+class WordSet;
 
 class FauxWordSet : public SubSet {
     public:
@@ -44,4 +44,6 @@ class FauxWordSet : public SubSet {
 
         std::set<std::string> elements_;
         mutable std::set<std::string> nonFauxElements_;
+
+        friend class WordSet;
 };

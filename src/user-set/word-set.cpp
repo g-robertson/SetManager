@@ -144,8 +144,13 @@ void WordSet::loadMachineSubset(std::istream& loadLocation) noexcept {
         skipRead(loadLocation, 1);
         // reads all of the text into the element
         loadLocation.read(element.data(), elementSize);
+        
+        if (becomingFaux != nullptr) {
+            becomingFaux->elements_.emplace(std::move(element));
+            continue;
+        }
         // if parent doesn't contain the element then issue a warning
-        if (!parent->contains(element) && !isBecomingFaux) {
+        if (!parent->contains(element)) {
             handleUnexpectedWordRemoval(element);
             continue;
         }
@@ -183,9 +188,12 @@ void WordSet::handleUnexpectedWordRemoval(const std::string& element) noexcept {
         } else if (std::toupper(input[0], std::locale()) == 'E') {
             exit(0);
         } else if (std::toupper(input[0], std::locale()) == 'F') {
-            isBecomingFaux = true;
-            parent->onQueryReplace = std::make_unique<FauxWordSet>(std::move(*this));
             elements_.insert(element);
+
+            parent->onQueryRemove = this;
+            auto fauxWordSet = std::make_unique<FauxWordSet>(std::move(*this));
+            becomingFaux = fauxWordSet.get();
+            parent->onQueryAdd = std::move(fauxWordSet);
             return;
         }
     } while (true);

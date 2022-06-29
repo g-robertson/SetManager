@@ -39,13 +39,7 @@ bool UserSet::preQuery() noexcept {
 
 bool UserSet::query() noexcept {
     queryable = true;
-    if (onQueryRemove != nullptr) {
-        this->subsets.erase(std::string(onQueryRemove->name()));
-        onQueryRemove = nullptr;
-    }
-    if (onQueryReplace) {
-        this->subsets.insert_or_assign(std::string(onQueryReplace->name()), std::move(onQueryReplace));
-    }
+    onQuery();
 
     if (onQueryEnter != nullptr) {
         while (onQueryEnter->query());
@@ -161,13 +155,7 @@ void UserSet::saveHumanSubsets(std::ostream& saveLocation) noexcept {
 }
 
 void UserSet::saveHumanSubsets_(std::ostream& saveLocation, int indentation) noexcept {
-    if (onQueryReplace) {
-        subsets.insert_or_assign(std::string(onQueryReplace->name()), std::move(onQueryReplace));
-    }
-    if (onQueryRemove != nullptr) {
-        subsets.erase(std::string(onQueryRemove->name()));
-        onQueryRemove = nullptr;
-    }
+    onQuery();
 
     saveLocation << std::string(indentation, ' ') << name() << " {\n"
                  << std::string(indentation + 2, ' ');
@@ -190,14 +178,7 @@ void UserSet::saveHumanSubsets_(std::ostream& saveLocation, int indentation) noe
                  << std::string(indentation + 2, ' ') << "Subsets {\n";
     for (const auto& subset : subsets) {
         subset.second->saveHumanSubsets_(saveLocation, indentation + 4);
-
-        if (onQueryReplace) {
-            subsets.insert_or_assign(std::string(onQueryReplace->name()), std::move(onQueryReplace));
-        }
-        if (onQueryRemove != nullptr) {
-            subsets.erase(std::string(onQueryRemove->name()));
-            onQueryRemove = nullptr;
-        }
+        onQuery();
     }
     saveLocation << std::string(indentation + 2, ' ') << "}\n"
                  << std::string(indentation, ' ') << "}\n";
@@ -212,13 +193,7 @@ void UserSet::loadMachineAllConnectedSubsets() noexcept {
 }
 
 void UserSet::saveMachineSubsets(std::ostream& saveLocation) noexcept {
-    if (onQueryReplace) {
-        subsets.insert_or_assign(std::string(onQueryReplace->name()), std::move(onQueryReplace));
-    }
-    if (onQueryRemove != nullptr) {
-        subsets.erase(std::string(onQueryRemove->name()));
-        onQueryRemove = nullptr;
-    }
+    onQuery();
 
     saveLocation << type() << ' ' << name().size() << ' ' << name() << ' ';
     saveMachineSubset(saveLocation);
@@ -226,13 +201,7 @@ void UserSet::saveMachineSubsets(std::ostream& saveLocation) noexcept {
     for (const auto& subset : subsets) {
         subset.second->saveMachineSubsets(saveLocation);
 
-        if (onQueryReplace) {
-            subsets.insert_or_assign(std::string(onQueryReplace->name()), std::move(onQueryReplace));
-        }
-        if (onQueryRemove != nullptr) {
-            subsets.erase(std::string(onQueryRemove->name()));
-            onQueryRemove = nullptr;
-    }
+        onQuery();
     }
     saveLocation << "0\n";
 }
@@ -240,12 +209,7 @@ void UserSet::saveMachineSubsets(std::ostream& saveLocation) noexcept {
 bool UserSet::loadMachineSubsets_(std::istream& loadLocation) noexcept {
     loadMachineSubset(loadLocation);
     while (!loadFailed) {
-        if (onQueryRemove != nullptr) {
-            subsets.erase(std::string(onQueryRemove->name()));
-        }
-        if (onQueryReplace) {
-            subsets.insert_or_assign(std::string(onQueryReplace->name()), std::move(onQueryReplace));
-        }
+        onQuery();
 
         char type;
         loadLocation >> type;
@@ -448,5 +412,15 @@ bool UserSet::contains(const std::string& element) const noexcept {
 void UserSet::removedElement(const std::string& element, bool expected) noexcept {
     for (const auto& subset : subsets) {
         subset.second->removedElement(element, expected);
+    }
+}
+
+void UserSet::onQuery() noexcept {
+    if (onQueryRemove != nullptr) {
+        subsets.erase(std::string(onQueryRemove->name()));
+        onQueryRemove = nullptr;
+    }
+    if (onQueryAdd) {
+        subsets.insert({std::string(onQueryAdd->name()), std::move(onQueryAdd)});
     }
 }
