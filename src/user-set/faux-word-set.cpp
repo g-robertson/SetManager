@@ -152,7 +152,8 @@ void FauxWordSet::loadMachineSubset(std::istream& loadLocation) noexcept {
         size_t elementSize;
         loadLocation >> elementSize;
         // pre-creates a string of elementSize to read into
-        auto element = std::string(elementSize, '0');
+        std::string element;
+        element.reserve(elementSize);
         // skips over the space after size
         skipRead(loadLocation, 1);
         // reads all of the text into the element
