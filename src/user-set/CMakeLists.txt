@@ -7,4 +7,5 @@ target_sources(SetManager
     PRIVATE directory-set.cpp
 
     PRIVATE derivative-set.cpp
+    PRIVATE intersection-set.cpp
 )

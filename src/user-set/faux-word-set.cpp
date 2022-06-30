@@ -173,7 +173,7 @@ const std::set<std::string>* FauxWordSet::complementElements() const noexcept {
 }
 
 void FauxWordSet::removedElement(const std::string& element, bool expected) noexcept {
-    for (const auto& subset : subsets) {
+    for (const auto& subset : subsets_) {
         subset.second->removedElement(element, expected);
     }
     elements_.erase(element);

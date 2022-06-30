@@ -180,7 +180,7 @@ void UserSet::saveHumanSubsets_(std::ostream& saveLocation, int indentation) noe
     }
     saveLocation << '\n' << std::string(indentation + 2, ' ') << "},\n"
                  << std::string(indentation + 2, ' ') << "Subsets {\n";
-    for (const auto& subset : subsets) {
+    for (const auto& subset : subsets_) {
         subset.second->saveHumanSubsets_(saveLocation, indentation + 4);
         onQuery();
     }
@@ -202,7 +202,7 @@ void UserSet::saveMachineSubsets(std::ostream& saveLocation) noexcept {
     saveLocation << type() << ' ' << name().size() << ' ' << name() << ' ';
     saveMachineSubset(saveLocation);
     saveLocation << '\n';
-    for (const auto& subset : subsets) {
+    for (const auto& subset : subsets_) {
         subset.second->saveMachineSubsets(saveLocation);
 
         onQuery();
@@ -231,21 +231,21 @@ bool UserSet::loadMachineSubsets_(std::istream& loadLocation) noexcept {
 
         switch (type) {
             case WordSet::type_:
-                subsets[name] = std::make_unique<WordSet>(this, name);
+                subsets_[name] = std::make_unique<WordSet>(this, name);
                 break;
             case FauxWordSet::type_:
-                subsets[name] = std::make_unique<FauxWordSet>(this, name);
+                subsets_[name] = std::make_unique<FauxWordSet>(this, name);
                 break;
             case DirectorySet::type_:
-                subsets[name] = std::make_unique<DirectorySet>(this, name);
+                subsets_[name] = std::make_unique<DirectorySet>(this, name);
                 break;
             case GlobalSet::type_:
             default:
                 return true;
         }
-        loadFailed = subsets.at(name)->loadMachineSubsets_(loadLocation);
+        loadFailed = subsets_.at(name)->loadMachineSubsets_(loadLocation);
     }
-    for (const auto& subset : subsets) {
+    for (const auto& subset : subsets_) {
         if (subset.second->postParentLoad()) {
             return true;
         }
@@ -268,7 +268,7 @@ void UserSet::loadMachineSubsets(std::istream& loadLocation) noexcept {
         loadFailed = true;
     }
     if (!loadFailed) {
-        subsets.clear();
+        subsets_.clear();
         loadMachineSubsets_(loadLocation);
     }
     if (loadFailed) {
@@ -291,7 +291,7 @@ void UserSet::loadMachineSubsets(std::istream& loadLocation) noexcept {
 
             std::cout << "Backed up loaded data to '" << backupLocation << "'\n";
         }
-        subsets.clear();
+        subsets_.clear();
         loadFailed = false;
     }
 }
@@ -299,7 +299,7 @@ void UserSet::loadMachineSubsets(std::istream& loadLocation) noexcept {
 void UserSet::listSubsets() noexcept {
     std::cout << "Subset list\n";
     std::cout << std::string(80, '-') << '\n';
-    for (const auto& subsetKVP : subsets) {
+    for (const auto& subsetKVP : subsets_) {
         std::cout << subsetKVP.first << '\n';
     }
     std::cout << std::string(80, '-') << '\n';
@@ -335,7 +335,7 @@ void UserSet::createSubset() noexcept {
         if (insensitiveSame(name, UserSet::EXIT_KEYWORD)) {
             return;
         }
-    } while (subsets.find(name) != subsets.end());
+    } while (subsets_.find(name) != subsets_.end());
 
     std::cout << "Enter a type for the subset\n";
 
@@ -343,12 +343,12 @@ void UserSet::createSubset() noexcept {
     if (subset == nullptr) {
         return;
     }
-    subsets[name] = std::unique_ptr<UserSet>(subset);
+    subsets_[name] = std::unique_ptr<UserSet>(subset);
 }
 
 void UserSet::deleteSubset() noexcept {
     std::string name;
-    decltype(subsets)::iterator subsetIt;
+    decltype(subsets_)::iterator subsetIt;
 
     ignoreAll(std::cin);
     do {
@@ -362,15 +362,15 @@ void UserSet::deleteSubset() noexcept {
         if (insensitiveSame(name, UserSet::EXIT_KEYWORD)) {
             return;
         }
-        subsetIt = subsets.find(name);
-    } while (subsetIt == subsets.end());
+        subsetIt = subsets_.find(name);
+    } while (subsetIt == subsets_.end());
 
-    subsets.erase(subsetIt);
+    subsets_.erase(subsetIt);
 }
 
 void UserSet::enterSubset() noexcept {
     std::string name;
-    decltype(subsets)::iterator subsetIt;
+    decltype(subsets_)::iterator subsetIt;
     
     ignoreAll(std::cin);
     do {
@@ -384,8 +384,8 @@ void UserSet::enterSubset() noexcept {
         if (insensitiveSame(name, UserSet::EXIT_KEYWORD)) {
             return;
         }
-        subsetIt = subsets.find(name);
-    } while (subsetIt == subsets.end());
+        subsetIt = subsets_.find(name);
+    } while (subsetIt == subsets_.end());
 
     while (subsetIt->second->query());
 }
@@ -419,17 +419,21 @@ bool UserSet::contains(const std::string& element) const noexcept {
 }
 
 void UserSet::removedElement(const std::string& element, bool expected) noexcept {
-    for (const auto& subset : subsets) {
+    for (const auto& subset : subsets_) {
         subset.second->removedElement(element, expected);
     }
 }
 
+const std::map<std::string, std::unique_ptr<UserSet>>& UserSet::subsets() const noexcept {
+    return subsets_;
+}
+
 void UserSet::onQuery() noexcept {
     if (onQueryRemove != nullptr) {
-        subsets.erase(std::string(onQueryRemove->name()));
+        subsets_.erase(std::string(onQueryRemove->name()));
         onQueryRemove = nullptr;
     }
     if (onQueryAdd) {
-        subsets.insert({std::string(onQueryAdd->name()), std::move(onQueryAdd)});
+        subsets_.insert({std::string(onQueryAdd->name()), std::move(onQueryAdd)});
     }
 }

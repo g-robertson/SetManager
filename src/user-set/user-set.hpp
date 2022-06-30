@@ -55,6 +55,8 @@ class UserSet {
         const static std::string DEFAULT_HUMAN_LOCATION;
         static UserSet* EXIT_SET_MENU(UserSet&, const std::string&) noexcept;
 
+        const std::map<std::string, std::unique_ptr<UserSet>>& subsets() const noexcept;
+
         UserSet* onQueryRemove = nullptr;
         std::unique_ptr<UserSet> onQueryAdd;
         UserSet* onQueryEnter = nullptr;
@@ -62,7 +64,7 @@ class UserSet {
         bool queryable = false;
         bool setSpecificQueryable = false;
         UserSet* parent;
-        std::map<std::string, std::unique_ptr<UserSet>> subsets;
+        std::map<std::string, std::unique_ptr<UserSet>> subsets_;
 
     private:
         const Menu<UserSet, void>& menu() const noexcept;

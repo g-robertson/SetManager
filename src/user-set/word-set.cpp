@@ -170,7 +170,7 @@ void WordSet::removedElement(const std::string& element, bool expected) noexcept
     if (!expected) {
         handleUnexpectedWordRemoval(element);
     }
-    for (const auto& subset : subsets) {
+    for (const auto& subset : subsets_) {
         subset.second->removedElement(element, true);
     }
     elements_.erase(element);
