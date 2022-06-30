@@ -115,8 +115,7 @@ void DirectorySet::loadMachineSubset(std::istream& loadLocation) noexcept {
     size_t directorySize;
     loadLocation >> directorySize;
     // directory names require null termination, I don't know why, it's probably documented somewhere
-    std::string directoryString = std::string('0', directorySize + 1);
-    directoryString[directorySize] = '\0';
+    std::string directoryString = std::string(directorySize + 1, '\0');
     skipRead(loadLocation, 1);
     loadLocation.read(directoryString.data(), directorySize);
 
