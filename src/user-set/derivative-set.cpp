@@ -55,6 +55,12 @@ void DerivativeSet::loadMachineSubset(std::istream& loadLocation) noexcept {
     loadMachineDerivativeSubset(loadLocation);
 }
 
+void DerivativeSet::saveMachineDerivativeSubset(std::ostream&) noexcept {
+}
+
+void DerivativeSet::loadMachineDerivativeSubset(std::istream&) noexcept {
+}
+
 bool DerivativeSet::postParentLoad() noexcept {
     if (postParentLoaded) {
         return false;

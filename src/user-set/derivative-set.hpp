@@ -26,8 +26,8 @@ class DerivativeSet : public SubSet {
 
         void saveMachineSubset(std::ostream& saveLocation) noexcept override;
         void loadMachineSubset(std::istream& saveLocation) noexcept override;
-        virtual void saveMachineDerivativeSubset(std::ostream& saveLocation) noexcept = 0;
-        virtual void loadMachineDerivativeSubset(std::istream& loadLocation) noexcept = 0;
+        virtual void saveMachineDerivativeSubset(std::ostream& saveLocation) noexcept;
+        virtual void loadMachineDerivativeSubset(std::istream& loadLocation) noexcept;
 
         bool postParentLoad() noexcept override;
         virtual bool postPostParentLoad() noexcept;
