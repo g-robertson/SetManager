@@ -30,7 +30,7 @@ UserSet* UserSet::EXIT_SET_MENU(UserSet&, const std::string&) noexcept {
 }
 
 UserSet::UserSet(UserSet* userSet) noexcept
-    : parent(userSet)
+    : parent_(userSet)
 {}
 
 bool UserSet::preQuery() noexcept {
@@ -108,8 +108,8 @@ void UserSet::saveAllConnectedSubsets(void (UserSet::*saveMethod)(std::ostream& 
     }
     
     UserSet* globalSet = this;
-    while (globalSet->parent != nullptr) {
-        globalSet = globalSet-> parent;
+    while (globalSet->parent() != nullptr) {
+        globalSet = globalSet->parent();
     }
     if (saveLocation == "d") {
         saveLocation = defaultSaveLocation;
@@ -136,8 +136,8 @@ void UserSet::loadAllConnectedSubsets(void (UserSet::*loadMethod)(std::istream& 
     }
 
     UserSet* globalSet = this;
-    while (globalSet->parent != nullptr) {
-        globalSet = globalSet->parent;
+    while (globalSet->parent() != nullptr) {
+        globalSet = globalSet->parent();
     }
     if (loadLocation == "d") {
         loadLocation = defaultLoadLocation;
@@ -402,8 +402,8 @@ void UserSet::exitProgram() noexcept {
     if (std::tolower(c) != 'n') {
         std::ofstream defaultLocation(UserSet::DEFAULT_MACHINE_LOCATION);
         UserSet* global = this;
-        while (global->parent != nullptr) {
-            global = global->parent;
+        while (global->parent() != nullptr) {
+            global = global->parent();
         }
         global->saveMachineSubsets(defaultLocation);
     }
@@ -422,6 +422,14 @@ void UserSet::removedElement(const std::string& element, bool expected) noexcept
     for (const auto& subset : subsets_) {
         subset.second->removedElement(element, expected);
     }
+}
+
+const UserSet* UserSet::parent() const noexcept {
+    return parent_;
+}
+
+UserSet* UserSet::parent() noexcept {
+    return parent_;
 }
 
 const std::map<std::string, std::unique_ptr<UserSet>>& UserSet::subsets() const noexcept {

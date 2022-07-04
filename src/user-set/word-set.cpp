@@ -39,7 +39,7 @@ void WordSet::addWord() noexcept {
     ignoreAll(std::cin);
     std::getline(std::cin, word);
 
-    if (!parent->contains(word)) {
+    if (!parent()->contains(word)) {
         std::cout << "That word is not in the parent set, and would make this not be a subset, and was therefore not inserted\n";
         return;
     }
@@ -50,12 +50,12 @@ void WordSet::addWord() noexcept {
 }
 
 void WordSet::addParentWord() noexcept {
-    if (parent->elements() == nullptr) {
+    if (parent()->elements() == nullptr) {
         std::cout << "The parent has an infinite set of elements and cannot be specified from\n";
         return;
     }
     int count = 0;
-    for (const auto& element : *parent->elements()) {
+    for (const auto& element : *parent()->elements()) {
         if (contains(element)) {
             continue;
         }
@@ -71,7 +71,7 @@ void WordSet::addParentWord() noexcept {
     }
     
     count = 0;
-    for (const auto& element : *parent->elements()) {
+    for (const auto& element : *parent()->elements()) {
         if (contains(element)) {
             continue;
         }
@@ -140,7 +140,7 @@ void WordSet::loadMachineSubset(std::istream& loadLocation) noexcept {
         loadLocation >> elementSize;
         // pre-creates a string of elementSize to read into
         std::string element;
-        element.reserve(elementSize);
+        element.resize(elementSize);
         // skips over the space after size
         skipRead(loadLocation, 1);
         // reads all of the text into the element
@@ -151,7 +151,7 @@ void WordSet::loadMachineSubset(std::istream& loadLocation) noexcept {
             continue;
         }
         // if parent doesn't contain the element then issue a warning
-        if (!parent->contains(element)) {
+        if (!parent()->contains(element)) {
             handleUnexpectedWordRemoval(element);
             continue;
         }
@@ -191,10 +191,10 @@ void WordSet::handleUnexpectedWordRemoval(const std::string& element) noexcept {
         } else if (std::toupper(input[0], std::locale()) == 'F') {
             elements_.insert(element);
 
-            parent->onQueryRemove = this;
+            parent()->onQueryRemove = this;
             auto fauxWordSet = std::make_unique<FauxWordSet>(std::move(*this));
             becomingFaux = fauxWordSet.get();
-            parent->onQueryAdd = std::move(fauxWordSet);
+            parent()->onQueryAdd = std::move(fauxWordSet);
             return;
         }
     } while (true);

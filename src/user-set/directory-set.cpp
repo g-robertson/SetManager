@@ -97,7 +97,7 @@ void DirectorySet::handleDirectoryError() noexcept {
     std::string input;
     std::cin >> input;
     if (std::toupper(input[0], std::locale()) == 'D') {
-        parent->onQueryRemove = this;
+        parent()->onQueryRemove = this;
         queryable = false;
         setSpecificQueryable = false;
     }

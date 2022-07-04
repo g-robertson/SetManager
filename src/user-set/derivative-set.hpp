@@ -36,7 +36,7 @@ class DerivativeSet : public SubSet {
     private:
         union {
             std::vector<UserSet*>* derivesFrom__;
-            std::vector<std::string>* derivesFromNames__;
+            std::vector<std::vector<std::string>>* derivesFromNames__;
         };
         bool postParentLoading = false;
         bool postParentLoaded = false;

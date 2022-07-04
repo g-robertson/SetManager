@@ -15,7 +15,7 @@
 #include <algorithm>
 
 FauxWordSet::FauxWordSet(WordSet&& wordSet) noexcept 
-    : SubSet(wordSet.parent, std::string(wordSet.name())), elements_(std::move(wordSet.elements_))
+    : SubSet(wordSet.parent(), std::string(wordSet.name())), elements_(std::move(wordSet.elements_))
 {}
 
 FauxWordSet::FauxWordSet(UserSet* parent, const std::string& name) noexcept
@@ -53,12 +53,12 @@ void FauxWordSet::addWord() noexcept {
 }
 
 void FauxWordSet::addParentWord() noexcept {
-    if (parent->elements() == nullptr) {
+    if (parent()->elements() == nullptr) {
         std::cout << "The parent has an infinite set of elements and cannot be specified from\n";
         return;
     }
     int count = 0;
-    for (const auto& element : *parent->elements()) {
+    for (const auto& element : *parent()->elements()) {
         if (contains(element)) {
             continue;
         }
@@ -74,7 +74,7 @@ void FauxWordSet::addParentWord() noexcept {
     }
     
     count = 0;
-    for (const auto& element : *parent->elements()) {
+    for (const auto& element : *parent()->elements()) {
         if (contains(element)) {
             continue;
         }
@@ -153,7 +153,7 @@ void FauxWordSet::loadMachineSubset(std::istream& loadLocation) noexcept {
         loadLocation >> elementSize;
         // pre-creates a string of elementSize to read into
         std::string element;
-        element.reserve(elementSize);
+        element.resize(elementSize);
         // skips over the space after size
         skipRead(loadLocation, 1);
         // reads all of the text into the element
@@ -164,7 +164,7 @@ void FauxWordSet::loadMachineSubset(std::istream& loadLocation) noexcept {
 
 const std::set<std::string>* FauxWordSet::elements() const noexcept {
     nonFauxElements_.clear();
-    auto* parentElements = parent->elements();
+    auto* parentElements = parent()->elements();
     std::set_intersection(elements_.begin(), elements_.end(), parentElements->begin(), parentElements->end(), std::inserter(nonFauxElements_, nonFauxElements_.begin()));
     return &nonFauxElements_;
 } 
