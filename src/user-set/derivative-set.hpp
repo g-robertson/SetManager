@@ -32,11 +32,11 @@ class DerivativeSet : public SubSet {
         bool postParentLoad() noexcept override;
         virtual bool postPostParentLoad() noexcept;
     protected:
-        std::vector<UserSet*>& derivesFrom_() noexcept;
+        std::vector<UserSet*>& derivesFrom() noexcept;
     private:
         union {
-            std::vector<UserSet*>* derivesFrom__;
-            std::vector<std::vector<std::string>>* derivesFromNames__;
+            std::vector<UserSet*>* derivesFrom_;
+            std::vector<std::vector<std::string>>* derivesFromNames_;
         };
         bool postParentLoading = false;
         bool postParentLoaded = false;

@@ -10,29 +10,29 @@
 #include "derivative-set.hpp"
 
 DerivativeSet::DerivativeSet(UserSet* parent, const std::string& name, std::initializer_list<UserSet*> userSets) noexcept
-    : SubSet(parent, name), derivesFrom__(new std::vector<UserSet*>(userSets))
+    : SubSet(parent, name), derivesFrom_(new std::vector<UserSet*>(userSets))
 {}
 
 // Note: It is undefined behavior to instantiate this class with the parent, name constructor and then not run postParentLoad() hook
 DerivativeSet::DerivativeSet(UserSet* parent, const std::string& name) noexcept
-    : SubSet(parent, name), derivesFromNames__(new std::vector<std::vector<std::string>>)
+    : SubSet(parent, name), derivesFromNames_(new std::vector<std::vector<std::string>>)
 {}
 
 DerivativeSet::~DerivativeSet() noexcept {
-    delete derivesFrom__;
+    delete derivesFrom_;
+}
+
+std::vector<UserSet*>& DerivativeSet::derivesFrom() noexcept {
+    return *derivesFrom_;
 }
 
 const std::vector<UserSet*>& DerivativeSet::derivesFrom() const noexcept {
-    return *derivesFrom__;
-}
-
-std::vector<UserSet*>& DerivativeSet::derivesFrom_() noexcept {
-    return *derivesFrom__;
+    return *derivesFrom_;
 }
 
 void DerivativeSet::saveMachineSubset(std::ostream& saveLocation) noexcept {
-    saveLocation << derivesFrom__->size();
-    for (const auto* userSet : *derivesFrom__) {
+    saveLocation << derivesFrom_->size();
+    for (const auto* userSet : *derivesFrom_) {
         std::stringstream nestedSubsetsWrite;
         int nestedCount = -1;
         for (; userSet != parent(); userSet = userSet->parent()) {
@@ -48,7 +48,7 @@ void DerivativeSet::saveMachineSubset(std::ostream& saveLocation) noexcept {
 void DerivativeSet::loadMachineSubset(std::istream& loadLocation) noexcept {
     int userSetsCount;
     loadLocation >> userSetsCount;
-    derivesFromNames__->reserve(userSetsCount);
+    derivesFromNames_->reserve(userSetsCount);
     for (; userSetsCount > 0; --userSetsCount) {
         int nestedCount;
         loadLocation >> nestedCount;
@@ -63,7 +63,7 @@ void DerivativeSet::loadMachineSubset(std::istream& loadLocation) noexcept {
 
             userSetNames.insert(userSetNames.begin() + nestedCount, std::move(userSetName));
         }
-        derivesFromNames__->push_back(std::move(userSetNames));
+        derivesFromNames_->push_back(std::move(userSetNames));
     }
     loadMachineDerivativeSubset(loadLocation);
 }
@@ -89,8 +89,8 @@ bool DerivativeSet::postParentLoad() noexcept {
     // sets up vector to store in derivesFrom__
     auto* userSets = new std::vector<UserSet*>;
     bool failed = false;
-    // adds all the nested names in derivesFromNames__ to userSets
-    for (const auto& userSetNames : *derivesFromNames__) {
+    // adds all the nested names in derivesFromNames_ to userSets
+    for (const auto& userSetNames : *derivesFromNames_) {
         auto* userSet = parent();
         for (const auto& userSetName : userSetNames) {
             auto& userSetSubsets = userSet->subsets();
@@ -108,9 +108,9 @@ bool DerivativeSet::postParentLoad() noexcept {
         
         userSets->push_back(userSet);
     }
-    // removes derivesFromNames__ and replaces it with derivesFrom__
-    delete derivesFromNames__;
-    derivesFrom__ = userSets;
+    // removes derivesFromNames_ and replaces it with derivesFrom__
+    delete derivesFromNames_;
+    derivesFrom_ = userSets;
     // only after the class is well formed by derivesFrom__ being defined do we allow it to finish short-circuit failing
     if (failed) {
         return true;
