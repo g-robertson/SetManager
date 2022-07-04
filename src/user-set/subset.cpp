@@ -9,6 +9,7 @@
 
 #include "word-set.hpp"
 #include "faux-word-set.hpp"
+#include "intersection-set.hpp"
 
 SubSet::SubSet(UserSet* parent, const std::string& name) noexcept
     : UserSet(parent), name_(name)
@@ -21,6 +22,7 @@ std::string_view SubSet::name() const noexcept {
 const auto SUBSET_CREATEABLE_SUBSET_MENU = StaticMenu<void, UserSet*, UserSet&, const std::string&>({
     {std::string(1, WordSet::type_), {"WordSet", WordSet::createSet}},
     {std::string(1, FauxWordSet::type_), {"FauxWordSet", FauxWordSet::createSet}},
+    {std::string(1, IntersectionSet::type_), {"IntersectionSet", IntersectionSet::createSet}},
     {UserSet::EXIT_KEYWORD, {"Exit", UserSet::EXIT_SET_MENU}}
 });
 

@@ -36,12 +36,11 @@ void DerivativeSet::saveMachineSubset(std::ostream& saveLocation) noexcept {
         std::stringstream nestedSubsetsWrite;
         int nestedCount = -1;
         for (; userSet != parent(); userSet = userSet->parent()) {
-            nestedSubsetsWrite << ' ' << userSet->name().size() << userSet->name();
+            nestedSubsetsWrite << ' ' << userSet->name().size() << ' ' << userSet->name();
             ++nestedCount;
         }
         saveLocation << ' ' << nestedCount << nestedSubsetsWrite.str();
     }
-    saveLocation << ' ';
     saveMachineDerivativeSubset(saveLocation);
 }
 
@@ -60,7 +59,6 @@ void DerivativeSet::loadMachineSubset(std::istream& loadLocation) noexcept {
             std::string userSetName;
             userSetName.resize(userSetSize);
             loadLocation >> userSetName;
-
             userSetNames.insert(userSetNames.begin() + nestedCount, std::move(userSetName));
         }
         derivesFromNames_->push_back(std::move(userSetNames));
@@ -74,46 +72,36 @@ void DerivativeSet::saveMachineDerivativeSubset(std::ostream&) noexcept {
 void DerivativeSet::loadMachineDerivativeSubset(std::istream&) noexcept {
 }
 
-bool DerivativeSet::postParentLoad() noexcept {
+void DerivativeSet::postParentLoad() noexcept(false) {
     // if already loaded, then don't load again
     if (postParentLoaded) {
-        return false;
+        return;
     }
     // if in process of loading, then there is a recursive set somewhere, which is not allowed
+    // also, this error cannot happen unless the set has already begun postParentLoad (i.e. it is already valid)
     if (postParentLoading) {
-        std::cout << "Recursive parent loading detected\n";
-        return true;
+        throw std::logic_error("Recursive parent loading detected");
     }
+    // immediately make it valid after calling postParentLoad
+    std::vector<std::vector<std::string>> derivesFromNames = std::move(*derivesFromNames_);
+    delete derivesFromNames_;
+    derivesFrom_ = new std::vector<UserSet*>;
+    derivesFrom_->reserve(derivesFromNames.size());
     postParentLoading = true;
 
-    // sets up vector to store in derivesFrom__
-    auto* userSets = new std::vector<UserSet*>;
-    bool failed = false;
     // adds all the nested names in derivesFromNames_ to userSets
-    for (const auto& userSetNames : *derivesFromNames_) {
+    for (const auto& userSetNames : derivesFromNames) {
         auto* userSet = parent();
         for (const auto& userSetName : userSetNames) {
             auto& userSetSubsets = userSet->subsets();
             auto userSetIt = userSetSubsets.find(userSetName);
             if (userSetIt == userSetSubsets.end()) {
-                failed = true;
-                break;
+                throw std::logic_error(std::string("User set '") + userSetName + "' included in derivative set could not be found");
             }
             userSet = userSetIt->second.get();
         }
-        if (failed || userSet->postParentLoad()) {
-            failed = true;
-            break;
-        }
-        
-        userSets->push_back(userSet);
-    }
-    // removes derivesFromNames_ and replaces it with derivesFrom__
-    delete derivesFromNames_;
-    derivesFrom_ = userSets;
-    // only after the class is well formed by derivesFrom__ being defined do we allow it to finish short-circuit failing
-    if (failed) {
-        return true;
+        userSet->postParentLoad();
+        derivesFrom_->push_back(userSet);
     }
 
     postParentLoading = false;
@@ -121,6 +109,5 @@ bool DerivativeSet::postParentLoad() noexcept {
     return postPostParentLoad();
 }
 
-bool DerivativeSet::postPostParentLoad() noexcept {
-    return false;
+void DerivativeSet::postPostParentLoad() noexcept(false) {
 }

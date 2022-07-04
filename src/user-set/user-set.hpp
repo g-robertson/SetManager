@@ -20,7 +20,7 @@ class UserSet {
 
         virtual std::string_view name() const noexcept = 0;
         virtual bool preQuery() noexcept;
-        virtual bool postParentLoad() noexcept;
+        virtual void postParentLoad() noexcept(false);
         bool query() noexcept;
         UserSet* queryForSubset() noexcept;
         UserSet* selectForSubset() noexcept;
@@ -84,7 +84,7 @@ class UserSet {
         bool loadFailed = false;
 
         void saveHumanSubsets_(std::ostream& saveLocation, int indentation) noexcept;
-        bool loadMachineSubsets_(std::istream& loadLocation) noexcept;
+        void loadMachineSubsets_(std::istream& loadLocation) noexcept(false);
 
         void onQuery() noexcept;
 };

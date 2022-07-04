@@ -9,6 +9,7 @@
 #include "word-set.hpp"
 #include "faux-word-set.hpp"
 #include "directory-set.hpp"
+#include "intersection-set.hpp"
 
 std::string_view GlobalSet::name() const noexcept {
     return "GLOBAL";
@@ -32,6 +33,7 @@ const auto GLOBAL_CREATEABLE_SUBSET_MENU = StaticMenu<void, UserSet*, UserSet&, 
     {std::string(1, WordSet::type_), {"WordSet", WordSet::createSet}},
     {std::string(1, FauxWordSet::type_), {"FauxWordSet", FauxWordSet::createSet}},
     {std::string(1, DirectorySet::type_), {"DirectorySet", DirectorySet::createSet}},
+    {std::string(1, IntersectionSet::type_), {"IntersectionSet", IntersectionSet::createSet}},
     {UserSet::EXIT_KEYWORD, {"Exit", UserSet::EXIT_SET_MENU}}
 });
 

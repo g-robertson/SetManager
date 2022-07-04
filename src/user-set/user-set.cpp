@@ -10,6 +10,8 @@
 #include "word-set.hpp"
 #include "faux-word-set.hpp"
 #include "directory-set.hpp"
+#include "intersection-set.hpp"
+
 #include "helpers.hpp"
 
 #include <set>
@@ -37,8 +39,7 @@ bool UserSet::preQuery() noexcept {
     return true;
 }
 
-bool UserSet::postParentLoad() noexcept {
-    return false;
+void UserSet::postParentLoad() noexcept(false) {
 }
 
 bool UserSet::query() noexcept {
@@ -249,7 +250,7 @@ void UserSet::saveMachineSubsets(std::ostream& saveLocation) noexcept {
     saveLocation << "0\n";
 }
 
-bool UserSet::loadMachineSubsets_(std::istream& loadLocation) noexcept {
+void UserSet::loadMachineSubsets_(std::istream& loadLocation) noexcept(false) {
     loadMachineSubset(loadLocation);
     while (!loadFailed) {
         onQuery();
@@ -278,18 +279,18 @@ bool UserSet::loadMachineSubsets_(std::istream& loadLocation) noexcept {
             case DirectorySet::type_:
                 subsets_[name] = std::make_unique<DirectorySet>(this, name);
                 break;
+            case IntersectionSet::type_:
+                subsets_[name] = std::make_unique<IntersectionSet>(this, name);
+                break;
             case GlobalSet::type_:
             default:
-                return true;
+                throw std::logic_error("Global or non-defined type found in load case");
         }
-        loadFailed = subsets_.at(name)->loadMachineSubsets_(loadLocation);
+        subsets_.at(name)->loadMachineSubsets_(loadLocation);
     }
     for (const auto& subset : subsets_) {
-        if (subset.second->postParentLoad()) {
-            return true;
-        }
+        subset.second->postParentLoad();
     }
-    return false;
 }
 
 void UserSet::loadMachineSubsets(std::istream& loadLocation) noexcept {
@@ -303,21 +304,37 @@ void UserSet::loadMachineSubsets(std::istream& loadLocation) noexcept {
 
     auto subsetName = std::string(subsetNameSize, '0');
     loadLocation.read(subsetName.data(), subsetNameSize);
-    if (subtype != type() || subsetName != name()) {
-        loadFailed = true;
-    }
-    if (!loadFailed) {
+    bool caughtError = false;
+    try {
+        if (subtype != type()) {
+            throw std::logic_error("type mismatch in head set");
+        }
+        if (subsetName != name()) {
+            throw std::logic_error("name mismatch in head set");
+        }
+
         subsets_.clear();
         loadMachineSubsets_(loadLocation);
-    }
-    if (loadFailed) {
+    } catch (const std::logic_error& error) {
         std::cout << "[IMPORTANT ERROR]\n"
                   << "[IMPORTANT ERROR]\n"
                   << "[IMPORTANT ERROR]\n"
-                  << "Failed to load subsets due to improper subset file format.\n"
+                  << "Failed to load subsets due to '" << error.what() << "'.\n"
                   << "[IMPORTANT ERROR]\n"
                   << "[IMPORTANT ERROR]\n"
                   << "[IMPORTANT ERROR]\n";
+        caughtError = true;
+    } catch (...) {
+        std::cout << "[FATAL ERROR]\n"
+                  << "[FATAL ERROR]\n"
+                  << "[FATAL ERROR]\n"
+                  << "I DO NOT KNOW WHAT HAPPENED TO CAUSE THIS, PLEASE REPORT THIS IF YOU FIND IT\n"
+                  << "[FATAL ERROR]\n"
+                  << "[FATAL ERROR]\n"
+                  << "[FATAL ERROR]\n";
+        caughtError = true;
+    }
+    if (caughtError) {
         loadLocation.seekg(0);
         if (loadLocation.tellg() == 0) {
             std::string backupLocation = DEFAULT_MACHINE_LOCATION + ".bak";
@@ -331,7 +348,6 @@ void UserSet::loadMachineSubsets(std::istream& loadLocation) noexcept {
             std::cout << "Backed up loaded data to '" << backupLocation << "'\n";
         }
         subsets_.clear();
-        loadFailed = false;
     }
 }
 
