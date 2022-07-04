@@ -59,7 +59,8 @@ bool UserSet::query() noexcept {
 
 const auto SUBSET_QUERY_MENU = StaticMenu<UserSet, UserSet*>({
     {"S", {"Select a subset to use", &UserSet::selectForSubset}},
-    {"E", {"Enter a subset and select from its subsets", &UserSet::enterForSubset}}
+    {"E", {"Enter a subset and select from its subsets", &UserSet::enterForSubset}},
+    {UserSet::EXIT_KEYWORD, {"Exit subset menu", &UserSet::exitSubsetMenu}}
 });
 
 UserSet* UserSet::queryForSubset() noexcept {
@@ -94,6 +95,10 @@ UserSet* UserSet::enterForSubset() noexcept {
     }
 
     return subset->queryForSubset();
+}
+
+UserSet* UserSet::exitSubsetMenu() noexcept {
+    return nullptr;
 }
 
 const auto USER_SET_MENU = StaticMenu<UserSet, void>({

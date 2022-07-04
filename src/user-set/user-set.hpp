@@ -25,6 +25,7 @@ class UserSet {
         UserSet* queryForSubset() noexcept;
         UserSet* selectForSubset() noexcept;
         UserSet* enterForSubset() noexcept;
+        UserSet* exitSubsetMenu() noexcept;
 
         void setSpecificOptions() noexcept;
         void exitSetSpecificOptions() noexcept;
@@ -56,6 +57,7 @@ class UserSet {
         const static std::string EXIT_KEYWORD;
         const static std::string DEFAULT_MACHINE_LOCATION;
         const static std::string DEFAULT_HUMAN_LOCATION;
+
         static UserSet* EXIT_SET_MENU(UserSet&, const std::string&) noexcept;
 
         const UserSet* parent() const noexcept;
