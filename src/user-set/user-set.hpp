@@ -22,6 +22,9 @@ class UserSet {
         virtual bool preQuery() noexcept;
         virtual bool postParentLoad() noexcept;
         bool query() noexcept;
+        UserSet* queryForSubset() noexcept;
+        UserSet* selectForSubset() noexcept;
+        UserSet* enterForSubset() noexcept;
 
         void setSpecificOptions() noexcept;
         void exitSetSpecificOptions() noexcept;

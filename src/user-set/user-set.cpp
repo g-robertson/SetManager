@@ -56,6 +56,45 @@ bool UserSet::query() noexcept {
     return queryable;
 }
 
+const auto SUBSET_QUERY_MENU = StaticMenu<UserSet, UserSet*>({
+    {"S", {"Select a subset to use", &UserSet::selectForSubset}},
+    {"E", {"Enter a subset and select from its subsets", &UserSet::enterForSubset}}
+});
+
+UserSet* UserSet::queryForSubset() noexcept {
+    return SUBSET_QUERY_MENU.query(*this);
+}
+
+UserSet* UserSet::selectForSubset() noexcept {
+    std::string name;
+    decltype(subsets_)::iterator subsetIt;
+    
+    ignoreAll(std::cin);
+    do {
+        if (!name.empty()) {
+            std::cout << "Enter a name that exists.\n";
+        }
+
+        listSubsets();
+        std::cout << "Enter the name of the list that you want to use for this option (case-sensitive) or \"" << UserSet::EXIT_KEYWORD << "\" to exit: ";
+        std::getline(std::cin, name);
+        if (insensitiveSame(name, UserSet::EXIT_KEYWORD)) {
+            return nullptr;
+        }
+        subsetIt = subsets_.find(name);
+    } while (subsetIt == subsets_.end());
+    return &(*subsetIt->second);
+}
+
+UserSet* UserSet::enterForSubset() noexcept {
+    auto* subset = selectForSubset();
+    if (subset == nullptr) {
+        return nullptr;
+    }
+
+    return subset->queryForSubset();
+}
+
 const auto USER_SET_MENU = StaticMenu<UserSet, void>({
     {"V", {"View set-specific options", &UserSet::setSpecificOptions}},
     {"H", {"Create a human-readable output of the subsets", &UserSet::saveHumanAllConnectedSubsets}},
@@ -347,47 +386,21 @@ void UserSet::createSubset() noexcept {
 }
 
 void UserSet::deleteSubset() noexcept {
-    std::string name;
-    decltype(subsets_)::iterator subsetIt;
+    auto* subset = selectForSubset();
+    if (subset == nullptr) {
+        return;
+    }
 
-    ignoreAll(std::cin);
-    do {
-        if (!name.empty()) {
-            std::cout << "Enter a name that exists.\n";
-        }
-
-        listSubsets();
-        std::cout << "Enter the name of the list that you want to enter (case-sensitive) or \"" << UserSet::EXIT_KEYWORD << "\" to exit: ";
-        std::getline(std::cin, name);
-        if (insensitiveSame(name, UserSet::EXIT_KEYWORD)) {
-            return;
-        }
-        subsetIt = subsets_.find(name);
-    } while (subsetIt == subsets_.end());
-
-    subsets_.erase(subsetIt);
+    subsets_.erase(std::string(subset->name()));
 }
 
 void UserSet::enterSubset() noexcept {
-    std::string name;
-    decltype(subsets_)::iterator subsetIt;
-    
-    ignoreAll(std::cin);
-    do {
-        if (!name.empty()) {
-            std::cout << "Enter a name that exists.\n";
-        }
+    auto* subset = selectForSubset();
+    if (subset == nullptr) {
+        return;
+    }
 
-        listSubsets();
-        std::cout << "Enter the name of the list that you want to enter (case-sensitive) or \"" << UserSet::EXIT_KEYWORD << "\" to exit: ";
-        std::getline(std::cin, name);
-        if (insensitiveSame(name, UserSet::EXIT_KEYWORD)) {
-            return;
-        }
-        subsetIt = subsets_.find(name);
-    } while (subsetIt == subsets_.end());
-
-    while (subsetIt->second->query());
+    while (subset->query());
 }
 
 void UserSet::moveUpHierarchy() noexcept {
