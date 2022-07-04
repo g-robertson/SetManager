@@ -9,6 +9,8 @@
 */
 #include "derivative-set.hpp"
 
+#include "helpers.hpp"
+
 DerivativeSet::DerivativeSet(UserSet* parent, const std::string& name, std::initializer_list<UserSet*> userSets) noexcept
     : SubSet(parent, name), derivesFrom_(new std::vector<UserSet*>(userSets))
 {}
@@ -58,8 +60,9 @@ void DerivativeSet::loadMachineSubset(std::istream& loadLocation) noexcept {
             loadLocation >> userSetSize;
             std::string userSetName;
             userSetName.resize(userSetSize);
-            loadLocation >> userSetName;
-            userSetNames.insert(userSetNames.begin() + nestedCount, std::move(userSetName));
+            skipRead(loadLocation, 1);
+            loadLocation.read(userSetName.data(), userSetSize);
+            userSetNames[nestedCount] = std::move(userSetName);
         }
         derivesFromNames_->push_back(std::move(userSetNames));
     }
