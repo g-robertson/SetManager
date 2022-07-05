@@ -13,7 +13,7 @@
 #include <iostream>
 
 WordSet::WordSet(UserSet* parent, const std::string& name) noexcept
-    : SubSet(parent, name)
+    : SubSet(parent, name, std::make_unique<std::set<std::string>>())
 {}
 
 UserSet* WordSet::createSet(UserSet& parent, const std::string& name) noexcept {
@@ -43,7 +43,7 @@ void WordSet::addWord() noexcept {
         std::cout << "That word is not in the parent set, and would make this not be a subset, and was therefore not inserted\n";
         return;
     }
-    auto inserted = elements_.insert(word);
+    auto inserted = elements_->insert(word);
     if (!inserted.second) {
         std::cout << "That word was already in the set and was therefore not inserted\n";
     }
@@ -77,7 +77,7 @@ void WordSet::addParentWord() noexcept {
         }
         ++count;
         if (count == selection) {
-            elements_.insert(element);
+            elements_->insert(element);
             return;
         }
     }
@@ -95,13 +95,13 @@ void WordSet::removeWord() noexcept {
 }
 
 void WordSet::removeContainedWord() noexcept {
-    if (elements_.size() == 0) {
+    if (elements_->size() == 0) {
         std::cout << "There are no words to select from to remove.\n";
         return;
     }
 
     int count = 0;
-    for (const auto& element : elements_) {
+    for (const auto& element : *elements_) {
         ++count;
         std::cout << count << ". '" << element << "'\n";
     }
@@ -114,7 +114,7 @@ void WordSet::removeContainedWord() noexcept {
     }
 
     count = 0;
-    for (const auto& element : elements_) {
+    for (const auto& element : *elements_) {
         ++count;
         if (count == selection) {
             removedElement(element, true);
@@ -145,26 +145,25 @@ void WordSet::loadMachineSubset(std::istream& loadLocation) noexcept {
         skipRead(loadLocation, 1);
         // reads all of the text into the element
         loadLocation.read(element.data(), elementSize);
-        
+        elements_->emplace(std::move(element));
+    }
+}
+
+void WordSet::postParentLoad() noexcept(false) {
+    for (const auto& element : *elements_) {
         if (becomingFaux != nullptr) {
-            becomingFaux->elements_.emplace(std::move(element));
-            continue;
+            break;
         }
+
         // if parent doesn't contain the element then issue a warning
         if (!parent()->contains(element)) {
             handleUnexpectedWordRemoval(element);
             continue;
         }
-        elements_.emplace(std::move(element));
     }
 }
 
-const std::set<std::string>* WordSet::elements() noexcept {
-    return &elements_;
-} 
-
-const std::set<std::string>* WordSet::complementElements() noexcept {
-    return nullptr;
+void WordSet::updateElements() noexcept {
 }
 
 void WordSet::removedElement(const std::string& element, bool expected) noexcept {
@@ -174,7 +173,7 @@ void WordSet::removedElement(const std::string& element, bool expected) noexcept
     for (const auto& subset : subsets_) {
         subset.second->removedElement(element, true);
     }
-    elements_.erase(element);
+    elements_->erase(element);
 }
 
 void WordSet::handleUnexpectedWordRemoval(const std::string& element) noexcept {
@@ -189,7 +188,7 @@ void WordSet::handleUnexpectedWordRemoval(const std::string& element) noexcept {
         } else if (std::toupper(input[0], std::locale()) == 'E') {
             exit(0);
         } else if (std::toupper(input[0], std::locale()) == 'F') {
-            elements_.insert(element);
+            elements_->insert(element);
 
             parent()->onQueryRemove = this;
             auto fauxWordSet = std::make_unique<FauxWordSet>(std::move(*this));

@@ -5,7 +5,7 @@
     It is an abstract type of set due to not having any defined methods for gathering elements, complement elements, or whom it derives from
     Its purpose is to provide an interface for ensuring that all subsets necessary for a derivative subset are available before finishing its load
 
-    Note: It is undefined behavior to instantiate this class with the parent, name constructor and then not run postParentLoad() hook
+    Note: It is undefined behavior to instantiate this class with the parent, name constructor and then not run postSiblingsLoad() hook
 */
 #pragma once
 
@@ -17,9 +17,20 @@
 
 class DerivativeSet : public SubSet {
     public:
-        DerivativeSet(UserSet* parent, const std::string& name, std::initializer_list<UserSet*>) noexcept;
-        // Note: It is undefined behavior to instantiate this class with the parent, name constructor and then not run postParentLoad() hook
-        DerivativeSet(UserSet* parent, const std::string& name) noexcept;
+        DerivativeSet(
+            UserSet* parent,
+            const std::string& name,
+            std::initializer_list<UserSet*> userSets,
+            std::unique_ptr<std::set<std::string>> elements = std::unique_ptr<std::set<std::string>>(),
+            std::unique_ptr<std::set<std::string>> complementElements = std::unique_ptr<std::set<std::string>>()
+        ) noexcept;
+        // Note: It is undefined behavior to instantiate this class with the parent, name constructor and then not run postSiblingsLoad() hook
+        DerivativeSet(
+            UserSet* parent,
+            const std::string& name,
+            std::unique_ptr<std::set<std::string>> elements = std::unique_ptr<std::set<std::string>>(),
+            std::unique_ptr<std::set<std::string>> complementElements = std::unique_ptr<std::set<std::string>>()
+        ) noexcept;
         virtual ~DerivativeSet() noexcept;
 
         const std::vector<UserSet*>& derivesFrom() const noexcept;
@@ -29,8 +40,8 @@ class DerivativeSet : public SubSet {
         virtual void saveMachineDerivativeSubset(std::ostream& saveLocation) noexcept;
         virtual void loadMachineDerivativeSubset(std::istream& loadLocation) noexcept;
 
-        void postParentLoad() noexcept(false) override;
-        virtual void postPostParentLoad() noexcept(false);
+        void postSiblingsLoad() noexcept(false) override;
+        virtual void postPostSiblingsLoad() noexcept(false);
     protected:
         std::vector<UserSet*>& derivesFrom() noexcept;
     private:
@@ -38,6 +49,6 @@ class DerivativeSet : public SubSet {
             std::vector<UserSet*>* derivesFrom_;
             std::vector<std::vector<std::string>>* derivesFromNames_;
         };
-        bool postParentLoading = false;
-        bool postParentLoaded = false;
+        bool postSiblingsLoading = false;
+        bool postSiblingsLoaded = false;
 }; 

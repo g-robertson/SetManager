@@ -5,19 +5,30 @@
     It is an abstract type of set due to not having any defined methods for gathering elements, complement elements, or whom it derives from
     Its purpose is to provide an interface for ensuring that all subsets necessary for a derivative subset are available before finishing its load
 
-    Note: It is undefined behavior to instantiate this class with the parent, name constructor and then not run postParentLoad() hook
+    Note: It is undefined behavior to instantiate this class with the parent, name constructor and then not run postSiblingsLoad() hook
 */
 #include "derivative-set.hpp"
 
 #include "helpers.hpp"
 
-DerivativeSet::DerivativeSet(UserSet* parent, const std::string& name, std::initializer_list<UserSet*> userSets) noexcept
-    : SubSet(parent, name), derivesFrom_(new std::vector<UserSet*>(userSets))
+DerivativeSet::DerivativeSet(
+    UserSet* parent,
+    const std::string& name,
+    std::initializer_list<UserSet*> userSets,
+    std::unique_ptr<std::set<std::string>> elements,
+    std::unique_ptr<std::set<std::string>> complementElements
+) noexcept
+    : SubSet(parent, name, std::move(elements), std::move(complementElements)), derivesFrom_(new std::vector<UserSet*>(userSets))
 {}
 
-// Note: It is undefined behavior to instantiate this class with the parent, name constructor and then not run postParentLoad() hook
-DerivativeSet::DerivativeSet(UserSet* parent, const std::string& name) noexcept
-    : SubSet(parent, name), derivesFromNames_(new std::vector<std::vector<std::string>>)
+// Note: It is undefined behavior to instantiate this class with the parent, name constructor and then not run postSiblingsLoad() hook
+DerivativeSet::DerivativeSet(
+    UserSet* parent,
+    const std::string& name,
+    std::unique_ptr<std::set<std::string>> elements,
+    std::unique_ptr<std::set<std::string>> complementElements
+) noexcept
+    : SubSet(parent, name, std::move(elements), std::move(complementElements)), derivesFromNames_(new std::vector<std::vector<std::string>>)
 {}
 
 DerivativeSet::~DerivativeSet() noexcept {
@@ -75,22 +86,22 @@ void DerivativeSet::saveMachineDerivativeSubset(std::ostream&) noexcept {
 void DerivativeSet::loadMachineDerivativeSubset(std::istream&) noexcept {
 }
 
-void DerivativeSet::postParentLoad() noexcept(false) {
+void DerivativeSet::postSiblingsLoad() noexcept(false) {
     // if already loaded, then don't load again
-    if (postParentLoaded) {
+    if (postSiblingsLoaded) {
         return;
     }
     // if in process of loading, then there is a recursive set somewhere, which is not allowed
-    // also, this error cannot happen unless the set has already begun postParentLoad (i.e. it is already valid)
-    if (postParentLoading) {
+    // also, this error cannot happen unless the set has already begun postSiblingsLoad (i.e. it is already valid)
+    if (postSiblingsLoading) {
         throw std::logic_error("Recursive parent loading detected");
     }
-    // immediately make it valid after calling postParentLoad
+    // immediately make it valid after calling postSiblingsLoad
     std::vector<std::vector<std::string>> derivesFromNames = std::move(*derivesFromNames_);
     delete derivesFromNames_;
     derivesFrom_ = new std::vector<UserSet*>;
     derivesFrom_->reserve(derivesFromNames.size());
-    postParentLoading = true;
+    postSiblingsLoading = true;
 
     // adds all the nested names in derivesFromNames_ to userSets
     for (const auto& userSetNames : derivesFromNames) {
@@ -103,14 +114,15 @@ void DerivativeSet::postParentLoad() noexcept(false) {
             }
             userSet = userSetIt->second.get();
         }
-        userSet->postParentLoad();
+        userSet->postSiblingsLoad();
         derivesFrom_->push_back(userSet);
     }
 
-    postParentLoading = false;
-    postParentLoaded = true;
-    return postPostParentLoad();
+    postSiblingsLoading = false;
+    postSiblingsLoaded = true;
+    updateElements();
+    return postPostSiblingsLoad();
 }
 
-void DerivativeSet::postPostParentLoad() noexcept(false) {
+void DerivativeSet::postPostSiblingsLoad() noexcept(false) {
 }

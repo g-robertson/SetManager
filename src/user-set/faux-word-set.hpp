@@ -25,9 +25,7 @@ class FauxWordSet : public SubSet {
 
         void saveMachineSubset(std::ostream& saveLocation) noexcept override;
         void loadMachineSubset(std::istream& loadLocation) noexcept override;
-
-        const std::set<std::string>* elements() noexcept override;
-        const std::set<std::string>* complementElements() noexcept override;
+        void updateElements() noexcept override;
         // #endregion 
 
         void addWord() noexcept;
@@ -42,8 +40,7 @@ class FauxWordSet : public SubSet {
         const Menu<UserSet, void>& setSpecificMenu() const noexcept override;
         // #endregion 
 
-        std::set<std::string> elements_;
-        mutable std::set<std::string> nonFauxElements_;
+        std::set<std::string> fauxElements;
 
         friend class WordSet;
 };

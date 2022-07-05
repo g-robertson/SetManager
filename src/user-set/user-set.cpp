@@ -35,8 +35,19 @@ UserSet* UserSet::EXIT_SET_MENU(UserSet&, const std::string&) noexcept {
     return nullptr;
 }
 
-UserSet::UserSet(UserSet* userSet) noexcept
-    : parent_(userSet)
+UserSet::UserSet(
+    std::unique_ptr<std::set<std::string>> elements,
+    std::unique_ptr<std::set<std::string>> complementElements
+) noexcept
+    : elements_(std::move(elements)), complementElements_(std::move(complementElements))
+{}
+
+UserSet::UserSet(
+    UserSet* parent,
+    std::unique_ptr<std::set<std::string>> elements,
+    std::unique_ptr<std::set<std::string>> complementElements
+) noexcept
+    : parent_(parent), elements_(std::move(elements)), complementElements_(std::move(complementElements))
 {}
 
 bool UserSet::preQuery() noexcept {
@@ -44,6 +55,13 @@ bool UserSet::preQuery() noexcept {
 }
 
 void UserSet::postParentLoad() noexcept(false) {
+    updateElements();
+    for (const auto& subset : subsets_) {
+        subset.second->postParentLoad();
+    }
+}
+
+void UserSet::postSiblingsLoad() noexcept(false) {
 }
 
 bool UserSet::query() noexcept {
@@ -110,6 +128,7 @@ const auto USER_SET_MENU = StaticMenu<UserSet, void>({
     {"H", {"Create a human-readable output of the subsets", &UserSet::saveHumanAllConnectedSubsets}},
     {"S", {"Save all connected subsets", &UserSet::saveMachineAllConnectedSubsets}},
     {"L", {"Load all connected subsets", &UserSet::loadMachineAllConnectedSubsets}},
+    {"U", {"Update internal elements", &UserSet::updateInternalElements}},
     {"LS", {"List subsets", &UserSet::listSubsets}},
     {"LE", {"List elements", &UserSet::listElements}},
     {"C", {"Create subset", &UserSet::createSubset}},
@@ -310,7 +329,7 @@ void UserSet::loadMachineSubsets_(std::istream& loadLocation) noexcept(false) {
         subsets_.at(name)->loadMachineSubsets_(loadLocation);
     }
     for (const auto& subset : subsets_) {
-        subset.second->postParentLoad();
+        subset.second->postSiblingsLoad();
     }
 }
 
@@ -336,6 +355,7 @@ void UserSet::loadMachineSubsets(std::istream& loadLocation) noexcept {
 
         subsets_.clear();
         loadMachineSubsets_(loadLocation);
+        postParentLoad();
     } catch (const std::logic_error& error) {
         std::cout << "[IMPORTANT ERROR]\n"
                   << "[IMPORTANT ERROR]\n"
@@ -370,6 +390,13 @@ void UserSet::loadMachineSubsets(std::istream& loadLocation) noexcept {
         }
         subsets_.clear();
     }
+}
+
+void UserSet::updateInternalElements() noexcept {
+    if (parent_ != nullptr) {
+        parent_->updateInternalElements();
+    }
+    updateElements();
 }
 
 void UserSet::listSubsets() noexcept {
@@ -460,11 +487,19 @@ void UserSet::exitProgram() noexcept {
     exit(0);
 }
 
-bool UserSet::contains(const std::string& element) noexcept {
-    if (elements() != nullptr) {
-        return elements()->count(element) == 1;
+const std::set<std::string>* UserSet::elements() const noexcept {
+    return elements_.get();
+}
+
+const std::set<std::string>* UserSet::complementElements() const noexcept {
+    return complementElements_.get();
+}
+
+bool UserSet::contains(const std::string& element) const noexcept {
+    if (elements_.get() != nullptr) {
+        return elements_->count(element) == 1;
     } else {
-        return complementElements()->count(element) == 0;
+        return complementElements_->count(element) == 0;
     }
 }
 

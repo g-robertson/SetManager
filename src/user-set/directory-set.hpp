@@ -26,13 +26,10 @@ class DirectorySet : public SubSet {
 
         void saveMachineSubset(std::ostream& saveLocation) noexcept override;
         void loadMachineSubset(std::istream& loadLocation) noexcept override;
-
-        const std::set<std::string>* elements() noexcept override;
-        const std::set<std::string>* complementElements() noexcept override;
+        void updateElements() noexcept override;
         // #endregion 
 
         void changeDirectory() noexcept;
-        void updateDirectory() noexcept;
         void listMirroredDirectory() noexcept;
 
         std::string_view directory() const noexcept;
@@ -43,7 +40,5 @@ class DirectorySet : public SubSet {
 
         void handleDirectoryError() noexcept;
 
-        // will always return mirroring the directory, is not logically a const-important member of this class
-        mutable std::set<std::string> elements_;
         std::filesystem::path directory_;
 }; 

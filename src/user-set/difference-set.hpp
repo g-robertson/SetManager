@@ -17,11 +17,6 @@ class DifferenceSet : public DerivativeSet {
         // #region UserSet public members override 
         static constexpr char type_ = '-';
         char type() const noexcept override { return type_; }
-    
-        const std::set<std::string>* elements() noexcept override;
-        const std::set<std::string>* complementElements() noexcept override;
+        void updateElements() noexcept override;
         // #endregion 
-
-    private:
-        mutable std::set<std::string> output;
 };

@@ -11,8 +11,12 @@
 
 class SubSet : public UserSet {
     public:
-        SubSet(UserSet* parent, const std::string& name) noexcept;
-
+        SubSet(
+            UserSet* parent,
+            const std::string& name,
+            std::unique_ptr<std::set<std::string>> elements = std::unique_ptr<std::set<std::string>>(),
+            std::unique_ptr<std::set<std::string>> complementElements = std::unique_ptr<std::set<std::string>>()
+        ) noexcept;
         // Must exist in all derived SubSets for creation
         // static UserSet* createSet(UserSet& parent, const std::string& name) noexcept;
 

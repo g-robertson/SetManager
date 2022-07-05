@@ -15,8 +15,13 @@
 #include "symmetric-difference-set.hpp"
 #include "relative-complement-set.hpp"
 
-SubSet::SubSet(UserSet* parent, const std::string& name) noexcept
-    : UserSet(parent), name_(name)
+SubSet::SubSet(
+    UserSet* parent,
+    const std::string& name,
+    std::unique_ptr<std::set<std::string>> elements,
+    std::unique_ptr<std::set<std::string>> complementElements
+) noexcept
+    : UserSet(parent, std::move(elements), std::move(complementElements)), name_(name)
 {}
 
 std::string_view SubSet::name() const noexcept {

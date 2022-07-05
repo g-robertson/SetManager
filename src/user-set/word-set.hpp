@@ -24,9 +24,8 @@ class WordSet : public SubSet {
 
         void saveMachineSubset(std::ostream& saveLocation) noexcept override;
         void loadMachineSubset(std::istream& loadLocation) noexcept override;
-
-        const std::set<std::string>* elements() noexcept override;
-        const std::set<std::string>* complementElements() noexcept override;
+        virtual void postParentLoad() noexcept(false);
+        void updateElements() noexcept override;
         // #endregion 
 
         void addWord() noexcept;
@@ -41,8 +40,6 @@ class WordSet : public SubSet {
         // #endregion 
 
         void handleUnexpectedWordRemoval(const std::string& element) noexcept;
-
-        std::set<std::string> elements_;
 
         FauxWordSet* becomingFaux = nullptr;
         friend class FauxWordSet;

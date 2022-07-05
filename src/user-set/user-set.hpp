@@ -14,13 +14,21 @@
 
 class UserSet {
     public:
-        UserSet() noexcept = default;
-        UserSet(UserSet* parent) noexcept;
+        UserSet(
+            std::unique_ptr<std::set<std::string>> elements = std::unique_ptr<std::set<std::string>>(),
+            std::unique_ptr<std::set<std::string>> complementElements = std::unique_ptr<std::set<std::string>>()
+        ) noexcept;
+        UserSet(
+            UserSet* parent,
+            std::unique_ptr<std::set<std::string>> elements = std::unique_ptr<std::set<std::string>>(),
+            std::unique_ptr<std::set<std::string>> complementElements = std::unique_ptr<std::set<std::string>>()
+        ) noexcept;
         virtual ~UserSet() noexcept = default;
 
         virtual std::string_view name() const noexcept = 0;
         virtual bool preQuery() noexcept;
-        virtual void postParentLoad() noexcept(false);
+        void postParentLoad() noexcept(false);
+        virtual void postSiblingsLoad() noexcept(false);
         bool query() noexcept;
         UserSet* queryForSubset() noexcept;
         UserSet* selectForSubset() noexcept;
@@ -48,10 +56,12 @@ class UserSet {
 
         virtual char type() const noexcept = 0;
 
-        bool contains(const std::string& element) noexcept;
+        bool contains(const std::string& element) const noexcept;
         virtual void removedElement(const std::string& element, bool expected) noexcept;
-        virtual const std::set<std::string>* elements() noexcept = 0;
-        virtual const std::set<std::string>* complementElements() noexcept = 0;
+        void updateInternalElements() noexcept;
+        virtual void updateElements() noexcept = 0;
+        const std::set<std::string>* elements() const noexcept;
+        const std::set<std::string>* complementElements() const noexcept;
 
         const static std::set<std::string> NO_ELEMENTS;
         const static std::string EXIT_KEYWORD;
@@ -72,6 +82,8 @@ class UserSet {
         bool setSpecificQueryable = false;
         UserSet* parent_;
         std::map<std::string, std::unique_ptr<UserSet>> subsets_;
+        std::unique_ptr<std::set<std::string>> elements_;
+        std::unique_ptr<std::set<std::string>> complementElements_;
 
     private:
         const Menu<UserSet, void>& menu() const noexcept;

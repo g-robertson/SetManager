@@ -13,13 +13,13 @@
 #include <filesystem>
 
 DirectorySet::DirectorySet(UserSet* parent, const std::string& name) noexcept
-    : SubSet(parent, name)
+    : SubSet(parent, name, std::make_unique<std::set<std::string>>())
 {}
 
 DirectorySet::DirectorySet(UserSet* parent, const std::string& name, const std::string& directory) noexcept
-    : SubSet(parent, name), directory_(std::filesystem::absolute(directory))
+    : SubSet(parent, name, std::make_unique<std::set<std::string>>()), directory_(std::filesystem::absolute(directory))
 {
-    updateDirectory();
+    updateElements();
 }
 
 UserSet* DirectorySet::createSet(UserSet& parent, const std::string& name) noexcept {
@@ -33,7 +33,6 @@ UserSet* DirectorySet::createSet(UserSet& parent, const std::string& name) noexc
 
 const auto DIRECTORY_SET_MENU = ReinterpretMenu<DirectorySet, UserSet, void>({
     {"LD", {"List mirrored directory", &DirectorySet::listMirroredDirectory}},
-    {"U", {"Update mirrored directory contents", &DirectorySet::updateDirectory}},
     {"X", {"Exit set-specific options", &DirectorySet::exitSetSpecificOptions}},
     {UserSet::EXIT_KEYWORD, {"Exit the program", &DirectorySet::exitProgram}}
 });
@@ -49,41 +48,11 @@ void DirectorySet::changeDirectory() noexcept {
     std::getline(std::cin, directory);
     directory_ = std::filesystem::absolute(directory);
 
-    updateDirectory();
-}
-
-void DirectorySet::updateDirectory() noexcept {
-    std::set<std::string> newElements;
-    try {
-        if (!std::filesystem::is_directory(directory_)) {
-            throw std::logic_error("Unresolveable, Directory set created on directory that does not exist.");
-        }
-        for (const auto& entry : std::filesystem::directory_iterator(directory_)) {
-            newElements.insert(entry.path().lexically_relative(directory_).string());
-        }
-    } catch (...) {
-        handleDirectoryError();
-        return;
-    }
-    for (const auto& element : elements_) {
-        if (newElements.find(element) == newElements.end()) {
-            removedElement(element, false);
-        }
-    }
-
-    elements_ = std::move(newElements);
+    updateElements();
 }
 
 void DirectorySet::listMirroredDirectory() noexcept {
     std::cout << directory() << '\n';
-}
-
-const std::set<std::string>* DirectorySet::elements() noexcept {
-    return &elements_;
-}
-
-const std::set<std::string>* DirectorySet::complementElements() noexcept {
-    return nullptr;
 }
 
 std::string_view DirectorySet::directory() const noexcept {
@@ -120,5 +89,26 @@ void DirectorySet::loadMachineSubset(std::istream& loadLocation) noexcept {
     loadLocation.read(directoryString.data(), directorySize);
 
     directory_ = std::filesystem::absolute(directoryString);
-    updateDirectory();
+}
+
+void DirectorySet::updateElements() noexcept {
+    std::set<std::string> newElements;
+    try {
+        if (!std::filesystem::is_directory(directory_)) {
+            throw std::logic_error("Unresolveable, Directory set created on directory that does not exist.");
+        }
+        for (const auto& entry : std::filesystem::directory_iterator(directory_)) {
+            newElements.insert(entry.path().lexically_relative(directory_).string());
+        }
+    } catch (...) {
+        handleDirectoryError();
+        return;
+    }
+    for (const auto& element : *elements_) {
+        if (newElements.find(element) == newElements.end()) {
+            removedElement(element, false);
+        }
+    }
+
+    *elements_ = std::move(newElements);
 }

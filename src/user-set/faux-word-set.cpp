@@ -2,9 +2,9 @@
     faux-word-set.hpp
 
     FauxWordSet is a type of subset that can contain any element that exists in the parent UserSet by selection, or entering the word,
-    it also contains a set of words that do not exist in the parent UserSet that will be automatically added to its elements if the parent gains them
+    it also contains a set of fauxElements that do not exist in the parent UserSet that will be automatically added to its elements if the parent gains them
 
-    Due to its possibilities of being capable of dealing with all words arbitrarily in any parent set, it can have any UserSet type as its parent 
+    Due to its possibilities of being capable of dealing with all fauxElements arbitrarily in any parent set, it can have any UserSet type as its parent 
 */
 #include "faux-word-set.hpp"
 
@@ -15,11 +15,11 @@
 #include <algorithm>
 
 FauxWordSet::FauxWordSet(WordSet&& wordSet) noexcept 
-    : SubSet(wordSet.parent(), std::string(wordSet.name())), elements_(std::move(wordSet.elements_))
+    : SubSet(wordSet.parent(), std::string(wordSet.name()), std::move(wordSet.elements_))
 {}
 
 FauxWordSet::FauxWordSet(UserSet* parent, const std::string& name) noexcept
-    : SubSet(parent, name)
+    : SubSet(parent, name, std::make_unique<std::set<std::string>>())
 {}
 
 UserSet* FauxWordSet::createSet(UserSet& parent, const std::string& name) noexcept {
@@ -46,7 +46,7 @@ void FauxWordSet::addWord() noexcept {
     ignoreAll(std::cin);
     std::getline(std::cin, word);
 
-    auto inserted = elements_.insert(word);
+    auto inserted = fauxElements.insert(word);
     if (!inserted.second) {
         std::cout << "That word was already in the set and was therefore not inserted\n";
     }
@@ -80,7 +80,7 @@ void FauxWordSet::addParentWord() noexcept {
         }
         ++count;
         if (count == selection) {
-            elements_.insert(element);
+            fauxElements.insert(element);
             return;
         }
     }
@@ -98,13 +98,13 @@ void FauxWordSet::removeWord() noexcept {
 }
 
 void FauxWordSet::removeContainedWord() noexcept {
-    if (elements_.size() == 0) {
-        std::cout << "There are no words to select from to remove.\n";
+    if (fauxElements.size() == 0) {
+        std::cout << "There are no fauxElements to select from to remove.\n";
         return;
     }
 
     int count = 0;
-    for (const auto& element : elements_) {
+    for (const auto& element : fauxElements) {
         ++count;
         std::cout << count << ". '" << element << "'\n";
     }
@@ -117,7 +117,7 @@ void FauxWordSet::removeContainedWord() noexcept {
     }
 
     count = 0;
-    for (const auto& element : elements_) {
+    for (const auto& element : fauxElements) {
         ++count;
         if (count == selection) {
             removedElement(element, true);
@@ -132,15 +132,15 @@ void FauxWordSet::listFauxElements() noexcept {
     std::cout << "Element list\n"
               << std::string(80, '-') << '\n'
               << "This set contains faux elements:\n";
-    for (const auto& element : elements_) {
+    for (const auto& element : fauxElements) {
         std::cout << '\'' << element << "'\n";
     }
     std::cout << std::string(80, '-') << '\n';
 }
 
 void FauxWordSet::saveMachineSubset(std::ostream& saveLocation) noexcept {
-    saveLocation << elements_.size();
-    for (const auto& element : elements_) {
+    saveLocation << fauxElements.size();
+    for (const auto& element : fauxElements) {
         saveLocation << ' ' << element.size() << ' ' << element;
     }
 }
@@ -158,29 +158,24 @@ void FauxWordSet::loadMachineSubset(std::istream& loadLocation) noexcept {
         skipRead(loadLocation, 1);
         // reads all of the text into the element
         loadLocation.read(element.data(), elementSize);
-        elements_.emplace(std::move(element));
+        fauxElements.emplace(std::move(element));
     }
 }
 
-const std::set<std::string>* FauxWordSet::elements() noexcept {
-    nonFauxElements_.clear();
+void FauxWordSet::updateElements() noexcept {
+    elements_->clear();
     auto* parentElements = parent()->elements();
     if (parentElements != nullptr) {
-        std::set_intersection(elements_.begin(), elements_.end(), parentElements->begin(), parentElements->end(), std::inserter(nonFauxElements_, nonFauxElements_.begin()));
+        std::set_intersection(fauxElements.begin(), fauxElements.end(), parentElements->begin(), parentElements->end(), std::inserter(*elements_, elements_->begin()));
     } else {
         auto* parentComplementElements = parent()->complementElements();
-        std::set_difference(elements.begin(), elements.end(), parentComplementElements->begin(), parentComplementElements->end(), std::inserter(nonFauxElements_, nonFauxElements_.begin()));
+        std::set_difference(fauxElements.begin(), fauxElements.end(), parentComplementElements->begin(), parentComplementElements->end(), std::inserter(*elements_, elements_->begin()));
     }
-    return &nonFauxElements_;
 } 
-
-const std::set<std::string>* FauxWordSet::complementElements() noexcept {
-    return nullptr;
-}
 
 void FauxWordSet::removedElement(const std::string& element, bool expected) noexcept {
     for (const auto& subset : subsets_) {
         subset.second->removedElement(element, expected);
     }
-    elements_.erase(element);
+    fauxElements.erase(element);
 }

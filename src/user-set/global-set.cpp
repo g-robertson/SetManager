@@ -15,6 +15,10 @@
 #include "symmetric-difference-set.hpp"
 #include "relative-complement-set.hpp"
 
+GlobalSet::GlobalSet()
+    : UserSet(std::make_unique<std::set<std::string>>())
+{}
+
 std::string_view GlobalSet::name() const noexcept {
     return "GLOBAL";
 }
@@ -25,12 +29,7 @@ void GlobalSet::saveMachineSubset(std::ostream&) noexcept {
 void GlobalSet::loadMachineSubset(std::istream&) noexcept {
 }
 
-const std::set<std::string>* GlobalSet::elements() noexcept {
-    return nullptr;
-}
-
-const std::set<std::string>* GlobalSet::complementElements() noexcept {
-    return &NO_ELEMENTS;
+void GlobalSet::updateElements() noexcept {
 }
 
 const auto GLOBAL_CREATEABLE_SUBSET_MENU = StaticMenu<void, UserSet*, UserSet&, const std::string&>({
