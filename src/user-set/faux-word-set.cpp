@@ -84,7 +84,7 @@ void FauxWordSet::addParentWord() noexcept {
             return;
         }
     }
-    std::cerr << "Impossible error: [Should not be able to get a selection that does not exist in the parent set]";
+    std::cerr << "[FATAL ERROR]: Should not be able to get a selection that does not exist in the parent set";
     exitProgram();
 }
 
@@ -124,7 +124,7 @@ void FauxWordSet::removeContainedWord() noexcept {
             return;
         }
     }
-    std::cerr << "Impossible error: [Should not be able to get a selection that does not exist in the parent set]";
+    std::cerr << "[FATAL ERROR]: Should not be able to get a selection that does not exist in the parent set";
     exitProgram();
 }
 
