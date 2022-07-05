@@ -159,11 +159,11 @@ void WordSet::loadMachineSubset(std::istream& loadLocation) noexcept {
     }
 }
 
-const std::set<std::string>* WordSet::elements() const noexcept {
+const std::set<std::string>* WordSet::elements() noexcept {
     return &elements_;
 } 
 
-const std::set<std::string>* WordSet::complementElements() const noexcept {
+const std::set<std::string>* WordSet::complementElements() noexcept {
     return nullptr;
 }
 

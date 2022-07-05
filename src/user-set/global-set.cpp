@@ -21,11 +21,11 @@ void GlobalSet::saveMachineSubset(std::ostream&) noexcept {
 void GlobalSet::loadMachineSubset(std::istream&) noexcept {
 }
 
-const std::set<std::string>* GlobalSet::elements() const noexcept {
+const std::set<std::string>* GlobalSet::elements() noexcept {
     return nullptr;
 }
 
-const std::set<std::string>* GlobalSet::complementElements() const noexcept {
+const std::set<std::string>* GlobalSet::complementElements() noexcept {
     return &NO_ELEMENTS;
 }
 

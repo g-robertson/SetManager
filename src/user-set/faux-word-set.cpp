@@ -162,14 +162,14 @@ void FauxWordSet::loadMachineSubset(std::istream& loadLocation) noexcept {
     }
 }
 
-const std::set<std::string>* FauxWordSet::elements() const noexcept {
+const std::set<std::string>* FauxWordSet::elements() noexcept {
     nonFauxElements_.clear();
     auto* parentElements = parent()->elements();
     std::set_intersection(elements_.begin(), elements_.end(), parentElements->begin(), parentElements->end(), std::inserter(nonFauxElements_, nonFauxElements_.begin()));
     return &nonFauxElements_;
 } 
 
-const std::set<std::string>* FauxWordSet::complementElements() const noexcept {
+const std::set<std::string>* FauxWordSet::complementElements() noexcept {
     return nullptr;
 }
 

@@ -48,10 +48,10 @@ class UserSet {
 
         virtual char type() const noexcept = 0;
 
-        bool contains(const std::string& element) const noexcept;
+        bool contains(const std::string& element) noexcept;
         virtual void removedElement(const std::string& element, bool expected) noexcept;
-        virtual const std::set<std::string>* elements() const noexcept = 0;
-        virtual const std::set<std::string>* complementElements() const noexcept = 0;
+        virtual const std::set<std::string>* elements() noexcept = 0;
+        virtual const std::set<std::string>* complementElements() noexcept = 0;
 
         const static std::set<std::string> NO_ELEMENTS;
         const static std::string EXIT_KEYWORD;

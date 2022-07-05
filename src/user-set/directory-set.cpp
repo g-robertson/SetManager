@@ -78,11 +78,11 @@ void DirectorySet::listMirroredDirectory() noexcept {
     std::cout << directory() << '\n';
 }
 
-const std::set<std::string>* DirectorySet::elements() const noexcept {
+const std::set<std::string>* DirectorySet::elements() noexcept {
     return &elements_;
 }
 
-const std::set<std::string>* DirectorySet::complementElements() const noexcept {
+const std::set<std::string>* DirectorySet::complementElements() noexcept {
     return nullptr;
 }
 

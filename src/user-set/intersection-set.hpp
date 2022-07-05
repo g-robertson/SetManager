@@ -18,8 +18,8 @@ class IntersectionSet : public DerivativeSet {
         static constexpr char type_ = 'I';
         char type() const noexcept override { return type_; }
     
-        const std::set<std::string>* elements() const noexcept override;
-        const std::set<std::string>* complementElements() const noexcept override;
+        const std::set<std::string>* elements() noexcept override;
+        const std::set<std::string>* complementElements() noexcept override;
         // #endregion 
 
     private:

@@ -444,7 +444,7 @@ void UserSet::exitProgram() noexcept {
     exit(0);
 }
 
-bool UserSet::contains(const std::string& element) const noexcept {
+bool UserSet::contains(const std::string& element) noexcept {
     if (elements() != nullptr) {
         return elements()->count(element) == 1;
     } else {

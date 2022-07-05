@@ -27,7 +27,7 @@ UserSet* UnionSet::createSet(UserSet& parent, const std::string& name) noexcept 
     return new UnionSet(&parent, name, set1, set2);
 }
 
-const std::set<std::string>* UnionSet::elements() const noexcept {
+const std::set<std::string>* UnionSet::elements() noexcept {
     const auto* set1Elements = derivesFrom().at(0)->elements();
     const auto* set2Elements = derivesFrom().at(1)->elements();
 
@@ -46,7 +46,7 @@ const std::set<std::string>* UnionSet::elements() const noexcept {
     return &output;
 }
 
-const std::set<std::string>* UnionSet::complementElements() const noexcept {
+const std::set<std::string>* UnionSet::complementElements() noexcept {
     const auto* set1ComplementElements = derivesFrom().at(0)->complementElements();
     const auto* set2ComplementElements = derivesFrom().at(1)->complementElements();
 

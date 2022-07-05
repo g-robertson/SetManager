@@ -27,7 +27,7 @@ UserSet* IntersectionSet::createSet(UserSet& parent, const std::string& name) no
     return new IntersectionSet(&parent, name, set1, set2);
 }
 
-const std::set<std::string>* IntersectionSet::elements() const noexcept {
+const std::set<std::string>* IntersectionSet::elements() noexcept {
     const auto* set1Elements = derivesFrom().at(0)->elements();
     const auto* set2Elements = derivesFrom().at(1)->elements();
 
@@ -66,7 +66,7 @@ const std::set<std::string>* IntersectionSet::elements() const noexcept {
     return &output;
 }
 
-const std::set<std::string>* IntersectionSet::complementElements() const noexcept {
+const std::set<std::string>* IntersectionSet::complementElements() noexcept {
     const auto* set1ComplementElements = derivesFrom().at(0)->complementElements();
     const auto* set2ComplementElements = derivesFrom().at(1)->complementElements();
 
