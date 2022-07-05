@@ -61,10 +61,10 @@ const std::set<std::string>* UnionSet::complementElements() const noexcept {
         // https://proofwiki.org/wiki/Set_Difference_as_Intersection_with_Complement
         // A Difference B = A Intersect Complement(B)
         // https://proofwiki.org/wiki/De_Morgan%27s_Laws_(Set_Theory)/Set_Complement/Complement_of_Union
-        // A Intersect Complement(B) = Complement(Complement(A) Union B)
-        // A Difference B = Complement(Complement(A) Union B)
-        // Complement(A) Difference B = Complement(A Union B)
-        // Complement(A Union B) = Complement(A) Difference B
+        // A Intersect B = Complement(Complement(A) Union Complement(B))
+        // => A Difference B = Complement(Complement(A) Union B)
+        // => Complement(A) Difference B = Complement(A Union B)
+        // => Complement(A Union B) = Complement(A) Difference B
         const auto* set2Elements = derivesFrom().at(1)->elements();
         std::set_difference(
             set1ComplementElements->begin(), set1ComplementElements->end(),
