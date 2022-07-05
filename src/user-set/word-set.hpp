@@ -33,6 +33,7 @@ class WordSet : public SubSet {
         void removeWord() noexcept;
         void removeContainedWord() noexcept;
 
+        bool addElement(const std::string& element) noexcept;
         void removedElement(const std::string& element, bool expected) noexcept override;
     private:
         // #region UserSet private members override 

@@ -43,8 +43,8 @@ void WordSet::addWord() noexcept {
         std::cout << "That word is not in the parent set, and would make this not be a subset, and was therefore not inserted\n";
         return;
     }
-    auto inserted = elements_->insert(word);
-    if (!inserted.second) {
+    auto inserted = addElement(word);
+    if (!inserted) {
         std::cout << "That word was already in the set and was therefore not inserted\n";
     }
 }
@@ -77,7 +77,7 @@ void WordSet::addParentWord() noexcept {
         }
         ++count;
         if (count == selection) {
-            elements_->insert(element);
+            addElement(element);
             return;
         }
     }
@@ -164,6 +164,11 @@ void WordSet::postParentLoad() noexcept(false) {
 }
 
 void WordSet::updateElements() noexcept {
+}
+
+
+bool WordSet::addElement(const std::string& element) noexcept {
+    return elements_->insert(element).second;
 }
 
 void WordSet::removedElement(const std::string& element, bool expected) noexcept {

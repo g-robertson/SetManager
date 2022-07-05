@@ -46,8 +46,8 @@ void FauxWordSet::addWord() noexcept {
     ignoreAll(std::cin);
     std::getline(std::cin, word);
 
-    auto inserted = fauxElements.insert(word);
-    if (!inserted.second) {
+    auto inserted = addElement(word);
+    if (!inserted) {
         std::cout << "That word was already in the set and was therefore not inserted\n";
     }
 }
@@ -80,7 +80,7 @@ void FauxWordSet::addParentWord() noexcept {
         }
         ++count;
         if (count == selection) {
-            fauxElements.insert(element);
+            addElement(element);
             return;
         }
     }
@@ -172,6 +172,12 @@ void FauxWordSet::updateElements() noexcept {
         std::set_difference(fauxElements.begin(), fauxElements.end(), parentComplementElements->begin(), parentComplementElements->end(), std::inserter(*elements_, elements_->begin()));
     }
 } 
+
+bool FauxWordSet::addElement(const std::string& element) noexcept {
+    bool added = fauxElements.insert(element).second;
+    updateElements();
+    return added;
+}
 
 void FauxWordSet::removedElement(const std::string& element, bool expected) noexcept {
     for (const auto& subset : subsets_) {

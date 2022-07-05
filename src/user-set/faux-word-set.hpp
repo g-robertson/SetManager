@@ -34,6 +34,7 @@ class FauxWordSet : public SubSet {
         void removeContainedWord() noexcept;
         void listFauxElements() noexcept;
 
+        bool addElement(const std::string& element) noexcept;
         void removedElement(const std::string& element, bool expected) noexcept override;
     private:
         // #region UserSet private members override 
