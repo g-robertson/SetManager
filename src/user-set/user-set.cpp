@@ -129,6 +129,8 @@ const auto USER_SET_MENU = StaticMenu<UserSet, void>({
     {"S", {"Save all connected subsets", &UserSet::saveMachineAllConnectedSubsets}},
     {"L", {"Load all connected subsets", &UserSet::loadMachineAllConnectedSubsets}},
     {"U", {"Update internal elements", &UserSet::updateInternalElements}},
+    {"T", {"Toggle whether or not this subset is inclued in human readable output", &UserSet::toggleHumanInclusion}},
+    {"TR", {"Toggle whether or not this subset and all of its nested children are included in human readable output", &UserSet::toggleHumanInclusionRecursively}},
     {"LS", {"List subsets", &UserSet::listSubsets}},
     {"LE", {"List elements", &UserSet::listElements}},
     {"C", {"Create subset", &UserSet::createSubset}},
@@ -228,7 +230,13 @@ void UserSet::saveHumanSubsets(std::ostream& saveLocation) noexcept {
 
 void UserSet::saveHumanSubsets_(std::ostream& saveLocation, int indentation) noexcept {
     onQuery();
-
+    if (!humanIncluded) {
+        for (const auto& subset : subsets_) {
+            subset.second->saveHumanSubsets_(saveLocation, indentation);
+            onQuery();
+        }
+        return;
+    }
     saveLocation << std::string(indentation, ' ') << name() << " {\n"
                  << std::string(indentation + 2, ' ');
     auto* elems = elements();
@@ -267,7 +275,7 @@ void UserSet::loadMachineAllConnectedSubsets() noexcept {
 void UserSet::saveMachineSubsets(std::ostream& saveLocation) noexcept {
     onQuery();
 
-    saveLocation << type() << ' ' << name().size() << ' ' << name() << ' ';
+    saveLocation << type() << ' ' << humanIncluded << ' ' << name().size() << ' ' << name() << ' ';
     saveMachineSubset(saveLocation);
     saveLocation << '\n';
     for (const auto& subset : subsets_) {
@@ -280,7 +288,7 @@ void UserSet::saveMachineSubsets(std::ostream& saveLocation) noexcept {
 
 void UserSet::loadMachineSubsets_(std::istream& loadLocation) noexcept(false) {
     loadMachineSubset(loadLocation);
-    while (!loadFailed) {
+    while (true) {
         onQuery();
 
         char type;
@@ -288,6 +296,9 @@ void UserSet::loadMachineSubsets_(std::istream& loadLocation) noexcept(false) {
         if (type == '0') {
             break;
         }
+
+        bool humanIncluded_;
+        loadLocation >> humanIncluded_;
 
         int nameSize;
         loadLocation >> nameSize;
@@ -326,6 +337,7 @@ void UserSet::loadMachineSubsets_(std::istream& loadLocation) noexcept(false) {
             default:
                 throw std::logic_error("Global or non-defined type found in load case");
         }
+        subsets_.at(name)->humanIncluded = humanIncluded_;
         subsets_.at(name)->loadMachineSubsets_(loadLocation);
     }
     for (const auto& subset : subsets_) {
@@ -336,6 +348,8 @@ void UserSet::loadMachineSubsets_(std::istream& loadLocation) noexcept(false) {
 void UserSet::loadMachineSubsets(std::istream& loadLocation) noexcept {
     char subtype;
     loadLocation >> subtype;
+
+    loadLocation >> humanIncluded;
 
     int subsetNameSize;
     loadLocation >> subsetNameSize;
@@ -397,6 +411,24 @@ void UserSet::updateInternalElements() noexcept {
         parent_->updateInternalElements();
     }
     updateElements();
+}
+
+void UserSet::toggleHumanInclusion() noexcept {
+    humanIncluded = !humanIncluded;
+    std::cout << "Human inclusion of this subset was turned " << (humanIncluded ? "on" : "off") << ".\n";
+}
+
+void UserSet::toggleHumanInclusionRecursively_(bool state) noexcept {
+    humanIncluded = state;
+    for (const auto& subset : subsets_) {
+        subset.second->toggleHumanInclusionRecursively_(state);
+    }
+}
+
+void UserSet::toggleHumanInclusionRecursively() noexcept {
+    humanIncluded = !humanIncluded;
+    toggleHumanInclusionRecursively_(humanIncluded);
+    std::cout << "Human inclusion of this subset and all of its nested children was turned " << (humanIncluded ? "on" : "off") << ".\n";
 }
 
 void UserSet::listSubsets() noexcept {

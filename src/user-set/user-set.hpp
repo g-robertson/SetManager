@@ -40,6 +40,9 @@ class UserSet {
         void saveHumanAllConnectedSubsets() noexcept;
         void saveMachineAllConnectedSubsets() noexcept;
         void loadMachineAllConnectedSubsets() noexcept;
+        void toggleHumanInclusion() noexcept;
+        void toggleHumanInclusionRecursively() noexcept;
+        void toggleHumanInclusionRecursively_(bool state) noexcept;
         void listSubsets() noexcept;
         void listElements() noexcept;
         void createSubset() noexcept;
@@ -77,6 +80,7 @@ class UserSet {
         UserSet* onQueryRemove = nullptr;
         std::unique_ptr<UserSet> onQueryAdd;
         UserSet* onQueryEnter = nullptr;
+        bool humanIncluded = true;
     protected:
         bool queryable = false;
         bool setSpecificQueryable = false;
@@ -94,8 +98,6 @@ class UserSet {
         void loadAllConnectedSubsets(void (UserSet::*loadMethod)(std::istream& loadLocation), std::string_view defaultLoadLocation) noexcept;
         void saveSubsets(void (UserSet::*saveMethod)(std::ostream& saveLocation), std::ofstream& saveLocation) const noexcept;
         void loadSubsets(void (UserSet::*loadMethod)(std::istream& loadLocation), std::ifstream& loadLocation) noexcept;
-
-        bool loadFailed = false;
 
         void saveHumanSubsets_(std::ostream& saveLocation, int indentation) noexcept;
         void loadMachineSubsets_(std::istream& loadLocation) noexcept(false);
