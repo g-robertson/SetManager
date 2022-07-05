@@ -78,7 +78,6 @@ const std::set<std::string>* IntersectionSet::complementElements() const noexcep
     output.clear();
     // https://proofwiki.org/wiki/De_Morgan%27s_Laws_(Set_Theory)/Set_Complement/Complement_of_Intersection
     // Complement(A Intersect B) = Complement(A) Union Complement(B)
-    // => A Intersect B = Complement(Complement(A) Union Complement(B))
     std::set_union(
         set1ComplementElements->begin(), set1ComplementElements->end(),
         set2ComplementElements->begin(), set2ComplementElements->end(),
