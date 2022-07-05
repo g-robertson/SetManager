@@ -60,9 +60,9 @@ const std::set<std::string>* UnionSet::complementElements() noexcept {
     if (set2ComplementElements == nullptr) {
         // https://proofwiki.org/wiki/Set_Difference_as_Intersection_with_Complement
         // A Difference B = A Intersect ~B
+        // => ~A Difference B = ~A Intersect ~B
         // https://proofwiki.org/wiki/De_Morgan%27s_Laws_(Set_Theory)/Set_Complement/Complement_of_Union
-        // A Intersect B = ~(~A Union ~B)
-        // => A Difference B = ~(~A Union B)
+        // ~(A Union B) = ~A Intersect ~B
         // => ~A Difference B = ~(A Union B)
         // => ~(A Union B) = ~A Difference B
         const auto* set2Elements = derivesFrom().at(1)->elements();
