@@ -10,6 +10,10 @@
 #include "word-set.hpp"
 #include "faux-word-set.hpp"
 #include "intersection-set.hpp"
+#include "union-set.hpp"
+#include "difference-set.hpp"
+#include "symmetric-difference-set.hpp"
+#include "relative-complement-set.hpp"
 
 SubSet::SubSet(UserSet* parent, const std::string& name) noexcept
     : UserSet(parent), name_(name)
@@ -23,6 +27,10 @@ const auto SUBSET_CREATEABLE_SUBSET_MENU = StaticMenu<void, UserSet*, UserSet&, 
     {std::string(1, WordSet::type_), {"WordSet", WordSet::createSet}},
     {std::string(1, FauxWordSet::type_), {"FauxWordSet", FauxWordSet::createSet}},
     {std::string(1, IntersectionSet::type_), {"IntersectionSet", IntersectionSet::createSet}},
+    {std::string(1, UnionSet::type_), {"UnionSet", UnionSet::createSet}},
+    {std::string(1, DifferenceSet::type_), {"DifferenceSet", DifferenceSet::createSet}},
+    {std::string(1, SymmetricDifferenceSet::type_), {"SymmetricDifferenceSet", SymmetricDifferenceSet::createSet}},
+    {std::string(1, RelativeComplementSet::type_), {"RelativeComplementSet", RelativeComplementSet::createSet}},
     {UserSet::EXIT_KEYWORD, {"Exit", UserSet::EXIT_SET_MENU}}
 });
 

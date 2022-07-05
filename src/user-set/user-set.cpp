@@ -11,6 +11,10 @@
 #include "faux-word-set.hpp"
 #include "directory-set.hpp"
 #include "intersection-set.hpp"
+#include "union-set.hpp"
+#include "difference-set.hpp"
+#include "symmetric-difference-set.hpp"
+#include "relative-complement-set.hpp"
 
 #include "helpers.hpp"
 
@@ -286,6 +290,18 @@ void UserSet::loadMachineSubsets_(std::istream& loadLocation) noexcept(false) {
                 break;
             case IntersectionSet::type_:
                 subsets_[name] = std::make_unique<IntersectionSet>(this, name);
+                break;
+            case UnionSet::type_:
+                subsets_[name] = std::make_unique<UnionSet>(this, name);
+                break;
+            case DifferenceSet::type_:
+                subsets_[name] = std::make_unique<DifferenceSet>(this, name);
+                break;
+            case SymmetricDifferenceSet::type_:
+                subsets_[name] = std::make_unique<SymmetricDifferenceSet>(this, name);
+                break;
+            case RelativeComplementSet::type_:
+                subsets_[name] = std::make_unique<RelativeComplementSet>(this, name);
                 break;
             case GlobalSet::type_:
             default:
