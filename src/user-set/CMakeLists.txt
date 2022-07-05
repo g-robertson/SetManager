@@ -10,5 +10,6 @@ target_sources(SetManager
     PRIVATE intersection-set.cpp
     PRIVATE union-set.cpp
     PRIVATE difference-set.cpp
+    PRIVATE symmetric-difference-set.cpp
     PRIVATE relative-complement-set.cpp
 )
