@@ -9,4 +9,5 @@ target_sources(SetManager
     PRIVATE derivative-set.cpp
     PRIVATE intersection-set.cpp
     PRIVATE union-set.cpp
+    PRIVATE difference-set.cpp
 )
