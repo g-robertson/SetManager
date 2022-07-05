@@ -8,4 +8,5 @@ target_sources(SetManager
 
     PRIVATE derivative-set.cpp
     PRIVATE intersection-set.cpp
+    PRIVATE union-set.cpp
 )
