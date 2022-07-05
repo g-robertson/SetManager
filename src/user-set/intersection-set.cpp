@@ -39,8 +39,8 @@ const std::set<std::string>* IntersectionSet::elements() noexcept {
     output.clear();
     if (set2Elements == nullptr) {
         // https://proofwiki.org/wiki/Set_Difference_as_Intersection_with_Complement
-        // A Difference B = A Intersect Complement(B)
-        // => A Difference Complement(B) = A Intersect B
+        // A Difference B = A Intersect ~B
+        // => A Difference ~B = A Intersect B
         const auto* set2ComplementElements = derivesFrom().at(1)->complementElements();
         std::set_difference(
             set1Elements->begin(), set1Elements->end(),
@@ -77,7 +77,7 @@ const std::set<std::string>* IntersectionSet::complementElements() noexcept {
 
     output.clear();
     // https://proofwiki.org/wiki/De_Morgan%27s_Laws_(Set_Theory)/Set_Complement/Complement_of_Intersection
-    // Complement(A Intersect B) = Complement(A) Union Complement(B)
+    // ~(A Intersect B) = ~A Union ~B
     std::set_union(
         set1ComplementElements->begin(), set1ComplementElements->end(),
         set2ComplementElements->begin(), set2ComplementElements->end(),

@@ -38,9 +38,9 @@ const std::set<std::string>* RelativeComplementSet::elements() noexcept {
         // https://proofwiki.org/wiki/Definition:Relative_Complement
         // RelativeComplement(A, B) = A Difference B
         // https://proofwiki.org/wiki/Set_Difference_of_Complements
-        // Complement(B) Difference Complement(A) = A Difference B
-        // => A Difference B = Complement(B) Difference Complement(A)
-        // => RelativeComplement(A, B) = Complement(B) Difference Complement(A)
+        // ~B Difference ~A = A Difference B
+        // => A Difference B = ~B Difference ~A
+        // => RelativeComplement(A, B) = ~B Difference ~A
         std::set_difference(
             setComplementElements->begin(), setComplementElements->end(),
             parentComplementElements->begin(), parentComplementElements->end(),
@@ -77,14 +77,14 @@ const std::set<std::string>* RelativeComplementSet::complementElements() noexcep
 
     output.clear();
     // https://proofwiki.org/wiki/Set_Difference_as_Intersection_with_Complement
-    // A Difference B = A Intersect Complement(B)
-    // => Complement(A Difference B) = Complement(A Intersect Complement(B))
+    // A Difference B = A Intersect ~B
+    // => ~(A Difference B) = ~(A Intersect ~B)
     // https://proofwiki.org/wiki/De_Morgan%27s_Laws_(Set_Theory)/Set_Complement/Complement_of_Union
-    // Complement(A Intersect B) = Complement(A) Union Complement(B)
-    // => Complement(A Difference B) = Complement(A) Union B
+    // ~(A Intersect B) = ~A Union ~B
+    // => ~(A Difference B) = ~A Union B
     // https://proofwiki.org/wiki/Definition:Relative_Complement
     // RelativeComplement(A, B) = A Difference B
-    // => Complement(RelativeComplement(A, B)) = Complement(A) Union B
+    // => ~(RelativeComplement(A, B)) = ~A Union B
     std::set_union(
         parentComplementElements->begin(), parentComplementElements->end(),
         setElements->begin(), setElements->end(),
