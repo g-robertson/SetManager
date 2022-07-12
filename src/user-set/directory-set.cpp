@@ -98,7 +98,7 @@ void DirectorySet::updateElements() noexcept {
             throw std::logic_error("Unresolveable, Directory set created on directory that does not exist.");
         }
         for (const auto& entry : std::filesystem::directory_iterator(directory_)) {
-            newElements.insert(entry.path().lexically_relative(directory_).string());
+            newElements.insert(entry.path().lexically_relative(directory_).generic_string());
         }
     } catch (...) {
         handleDirectoryError();
