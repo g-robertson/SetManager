@@ -35,7 +35,7 @@ UserSet* DirectorySet::createSet(UserSet& parent, const pstring& name) noexcept 
 const auto DIRECTORY_SET_MENU = ReinterpretMenu<DirectorySet, UserSet, void>({
     {pliteral("LD"), {pliteral("List mirrored directory"), &DirectorySet::listMirroredDirectory}},
     {pliteral("X"), {pliteral("Exit set-specific options"), &DirectorySet::exitSetSpecificOptions}},
-    {UserSet::EXIT_KEYWORD, {pliteral("Exit the program"), &DirectorySet::exitProgram}}
+    {pstring(UserSet::EXIT_KEYWORD), {pliteral("Exit the program"), &DirectorySet::exitProgram}}
 });
 
 const Menu<UserSet, void>& DirectorySet::setSpecificMenu() const noexcept {
@@ -66,12 +66,12 @@ void DirectorySet::handleDirectoryError() noexcept {
               << "Enter [D] to delete, [E] to exit the program without saving, or anything else to continue: ";
     pstring input;
     pcin >> input;
-    if (std::toupper(input[0], std::locale()) == 'D') {
+    if (ptoupper(input[0]) == 'D') {
         parent()->onQueryRemove = this;
         queryable = false;
         setSpecificQueryable = false;
     }
-    if (std::toupper(input[0], std::locale()) == 'E') {
+    if (ptoupper(input[0]) == 'E') {
         exit(0);
     }
 }

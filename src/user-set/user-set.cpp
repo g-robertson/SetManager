@@ -25,9 +25,7 @@
 #include <fstream>
 #include <stdexcept>
 
-const std::set<pstring> UserSet::NO_ELEMENTS = std::set<pstring>();
-
-const pstring UserSet::EXIT_KEYWORD = pliteral("EXIT");
+const std::set<pstring> UserSet::NO_ELEMENTS;
 const std::filesystem::path UserSet::DEFAULT_MACHINE_LOCATION = "managed-sets.txt";
 const std::filesystem::path UserSet::DEFAULT_HUMAN_LOCATION = "human-readable-sets.txt";
 
@@ -82,7 +80,7 @@ bool UserSet::query() noexcept {
 const auto SUBSET_QUERY_MENU = StaticMenu<UserSet, UserSet*>({
     {pliteral("S"), {pliteral("Select a subset to use"), &UserSet::selectForSubset}},
     {pliteral("E"), {pliteral("Enter a subset and select from its subsets"), &UserSet::enterForSubset}},
-    {UserSet::EXIT_KEYWORD, {pliteral("Exit subset menu"), &UserSet::exitSubsetMenu}}
+    {pstring(UserSet::EXIT_KEYWORD), {pliteral("Exit subset menu"), &UserSet::exitSubsetMenu}}
 });
 
 UserSet* UserSet::queryForSubset() noexcept {
@@ -137,7 +135,7 @@ const auto USER_SET_MENU = StaticMenu<UserSet, void>({
     {pliteral("D"), {pliteral("Delete a subset"), &UserSet::deleteSubset}},
     {pliteral("E"), {pliteral("Enter a subset"), &UserSet::enterSubset}},
     {pliteral("X"), {pliteral("Move up one set hierarchy, or exit program if at top"), &UserSet::moveUpHierarchy}},
-    {UserSet::EXIT_KEYWORD, {pliteral("Exit the program"), &UserSet::exitProgram}}
+    {pstring(UserSet::EXIT_KEYWORD), {pliteral("Exit the program"), &UserSet::exitProgram}}
 });
 
 const Menu<UserSet, void>& UserSet::menu() const noexcept {
@@ -146,7 +144,7 @@ const Menu<UserSet, void>& UserSet::menu() const noexcept {
 
 const auto USER_SET_SPECIFIC_BASE_MENU = StaticMenu<UserSet, void>({
     {pliteral("X"), {pliteral("Exit set-specific options"), &UserSet::exitSetSpecificOptions}},
-    {UserSet::EXIT_KEYWORD, {pliteral("Exit the program"), &UserSet::exitProgram}}
+    {pstring(UserSet::EXIT_KEYWORD), {pliteral("Exit the program"), &UserSet::exitProgram}}
 });
 
 const Menu<UserSet, void>& UserSet::setSpecificMenu() const noexcept {
@@ -173,7 +171,7 @@ void UserSet::saveAllConnectedSubsets(void (UserSet::*saveMethod)(std::ostream& 
     pCinIgnoreAll();;
     pCinGetLine(saveLocation);
 
-    if (insensitiveSame(saveLocation, UserSet::EXIT_KEYWORD)) {
+    if (insensitiveSame(saveLocation.c_str(), UserSet::EXIT_KEYWORD)) {
         return;
     }
     
@@ -201,7 +199,7 @@ void UserSet::loadAllConnectedSubsets(void (UserSet::*loadMethod)(std::istream& 
     pCinIgnoreAll();;
     pCinGetLine(loadLocation);
 
-    if (insensitiveSame(loadLocation, UserSet::EXIT_KEYWORD)) {
+    if (insensitiveSame(loadLocation.c_str(), UserSet::EXIT_KEYWORD)) {
         return;
     }
 

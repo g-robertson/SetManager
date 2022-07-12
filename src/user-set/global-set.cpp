@@ -41,7 +41,7 @@ const auto GLOBAL_CREATEABLE_SUBSET_MENU = StaticMenu<void, UserSet*, UserSet&, 
     {pstring(1, DifferenceSet::type_), {pliteral("DifferenceSet"), DifferenceSet::createSet}},
     {pstring(1, SymmetricDifferenceSet::type_), {pliteral("SymmetricDifferenceSet"), SymmetricDifferenceSet::createSet}},
     {pstring(1, RelativeComplementSet::type_), {pliteral("RelativeComplementSet"), RelativeComplementSet::createSet}},
-    {UserSet::EXIT_KEYWORD, {pliteral("Exit"), UserSet::EXIT_SET_MENU}}
+    {pstring(UserSet::EXIT_KEYWORD), {pliteral("Exit"), UserSet::EXIT_SET_MENU}}
 });
 
 const Menu<void, UserSet*, UserSet&, const pstring&>& GlobalSet::createableSubsetMenu() const noexcept {

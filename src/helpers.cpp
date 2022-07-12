@@ -30,9 +30,9 @@ std::ostream& operator<<(std::ostream& ostr, const replaceformat_&) {
 }
 
 
-bool insensitiveSame(const pstring& str1, const pstring& str2) {
+bool insensitiveSame(pstring_view str1, pstring_view str2) {
     return str1.size() == str2.size() && std::equal(str1.begin(), str1.end(), str2.begin(), str2.end(), [](auto char1, auto char2) {
-        return std::toupper(char1, std::locale()) == std::toupper(char2, std::locale());
+        return ptoupper(char1) == ptoupper(char2);
     });
 }
 

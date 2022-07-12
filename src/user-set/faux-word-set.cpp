@@ -33,7 +33,7 @@ const auto FAUX_WORD_SET_MENU = ReinterpretMenu<FauxWordSet, UserSet, void>({
     {pliteral("RX"), {pliteral("Remove a word by number in this set"), &FauxWordSet::removeContainedWord}},
     {pliteral("LE"), {pliteral("List faux elements"), &FauxWordSet::listFauxElements}},
     {pliteral("X"), {pliteral("Exit set-specific options"), &FauxWordSet::exitSetSpecificOptions}},
-    {UserSet::EXIT_KEYWORD, {pliteral("Exit the program"), &FauxWordSet::exitProgram}}
+    {pstring(UserSet::EXIT_KEYWORD), {pliteral("Exit the program"), &FauxWordSet::exitProgram}}
 });
 
 const Menu<UserSet, void>& FauxWordSet::setSpecificMenu() const noexcept {

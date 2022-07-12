@@ -26,7 +26,7 @@ const auto WORD_SET_MENU = ReinterpretMenu<WordSet, UserSet, void>({
     {pliteral("R"), {pliteral("Remove a word"), &WordSet::removeWord}},
     {pliteral("RX"), {pliteral("Remove a word by number in this set"), &WordSet::removeContainedWord}},
     {pliteral("X"), {pliteral("Exit set-specific options"), &WordSet::exitSetSpecificOptions}},
-    {UserSet::EXIT_KEYWORD, {pliteral("Exit the program"), &WordSet::exitProgram}}
+    {pstring(UserSet::EXIT_KEYWORD), {pliteral("Exit the program"), &WordSet::exitProgram}}
 });
 
 const Menu<UserSet, void>& WordSet::setSpecificMenu() const noexcept {
@@ -190,11 +190,11 @@ void WordSet::handleUnexpectedWordRemoval(const pstring& element) noexcept {
     pstring input;
     do {
         pcin >> input;
-        if (std::toupper(input[0], std::locale()) == 'D') {
+        if (ptoupper(input[0]) == 'D') {
             return;
-        } else if (std::toupper(input[0], std::locale()) == 'E') {
+        } else if (ptoupper(input[0]) == 'E') {
             exit(0);
-        } else if (std::toupper(input[0], std::locale()) == 'F') {
+        } else if (ptoupper(input[0]) == 'F') {
             elements_->insert(element);
 
             parent()->onQueryRemove = this;

@@ -23,7 +23,7 @@ class replaceformat_ {
 
 const replaceformat_ replaceformat;
 
-bool insensitiveSame(const pstring& str1, const pstring& str2);
+bool insensitiveSame(pstring_view str1, pstring_view str2);
 
 void skipRead(std::istream& istr, size_t count);
 
