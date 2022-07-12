@@ -81,6 +81,8 @@ void pCinGetLine(std::filesystem::path& path, pstring delimeter = "\n");
 #endif
 
 void platform();
+pchar ptolower(pchar character);
+pchar ptoupper(pchar character);
 std::string genericStringFromPString(const pstring& string);
 std::string genericStringFromPString(pstring_view string);
 pstring genericStringToPString(const std::string& string);

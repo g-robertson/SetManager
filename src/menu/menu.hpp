@@ -32,7 +32,7 @@ class StaticMenu : public Menu<TClass, TReturn, TArgs...> {
             for (const auto& optionKVP : optionList) {
                 pstring optionName = optionKVP.first;
                 for (auto& character : optionName) {
-                    character = std::toupper(character, std::locale());
+                    character = ptoupper(character);
                 }
 
                 auto mapIterator = optionMap_.insert({optionName, optionKVP.second});
@@ -52,7 +52,7 @@ class StaticMenu : public Menu<TClass, TReturn, TArgs...> {
                 pstring input;
                 pcin >> input;
                 for (auto& character : input) {
-                    character = std::toupper(character, std::locale());
+                    character = ptoupper(character);
                 }
 
                 const auto& selectedMenuOptionKVP = optionMap_.find(input);
@@ -77,7 +77,7 @@ class StaticMenu<void, TReturn, TArgs...> : public Menu<void, TReturn, TArgs...>
             for (const auto& optionKVP : optionList) {
                 pstring optionName = optionKVP.first;
                 for (auto& character : optionName) {
-                    character = std::toupper(character, std::locale());
+                    character = ptoupper(character);
                 }
 
                 auto mapIterator = optionMap_.insert({optionName, optionKVP.second});
@@ -97,7 +97,7 @@ class StaticMenu<void, TReturn, TArgs...> : public Menu<void, TReturn, TArgs...>
                 pstring input;
                 pcin >> input;
                 for (auto& character : input) {
-                    character = std::toupper(character, std::locale());
+                    character = ptoupper(character);
                 }
 
                 const auto& selectedMenuOptionKVP = optionMap_.find(input);
@@ -121,7 +121,7 @@ class ReinterpretMenu : public Menu<TClass, TReturn, TArgs...> {
             for (const auto& optionKVP : optionList) {
                 pstring optionName = optionKVP.first;
                 for (auto& character : optionName) {
-                    character = std::toupper(character, std::locale());
+                    character = ptoupper(character);
                 }
 
                 auto mapIterator = optionMap_.insert({optionName, optionKVP.second});
@@ -141,7 +141,7 @@ class ReinterpretMenu : public Menu<TClass, TReturn, TArgs...> {
                 pstring input;
                 pcin >> input;
                 for (auto& character : input) {
-                    character = std::toupper(character, std::locale());
+                    character = ptoupper(character);
                 }
 
                 const auto& selectedMenuOptionKVP = optionMap_.find(input);

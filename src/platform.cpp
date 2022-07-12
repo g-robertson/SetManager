@@ -177,6 +177,14 @@ void pCoutExtraction(pchar extract) {
     WriteConsoleW(WinCout, &extract, 1, &charactersWritten, NULL);
 }
 
+pchar ptolower(pchar character) {
+    return std::towlower(character);
+}
+
+pchar ptoupper(pchar character) {
+    return std::towupper(character);
+}
+
 std::string genericStringFromPString(const pstring& string) {
     return genericStringFromPString(pstring_view(string));
 }
@@ -241,6 +249,14 @@ void pCinGet(pchar& character) {
 }
 void pCinIgnoreAll() {
     ignoreAll(std::cin);
+}
+
+pchar ptolower(pchar character) {
+    return std::tolower(character, loc);
+}
+
+pchar ptoupper(pchar character) {
+    return std::toupper(character);
 }
 
 std::string genericStringFromPString(const pstring& string) {
