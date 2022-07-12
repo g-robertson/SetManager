@@ -6,15 +6,15 @@
 
 #include <algorithm>
 
-RelativeComplementSet::RelativeComplementSet(UserSet* parent, const std::string& name, UserSet* set) noexcept
+RelativeComplementSet::RelativeComplementSet(UserSet* parent, const pstring& name, UserSet* set) noexcept
     : DerivativeSet(parent, name, {set})
 {}
 
-RelativeComplementSet::RelativeComplementSet(UserSet* parent, const std::string& name) noexcept
+RelativeComplementSet::RelativeComplementSet(UserSet* parent, const pstring& name) noexcept
     : DerivativeSet(parent, name)
 {}
 
-UserSet* RelativeComplementSet::createSet(UserSet& parent, const std::string& name) noexcept {
+UserSet* RelativeComplementSet::createSet(UserSet& parent, const pstring& name) noexcept {
     auto* set = parent.queryForSubset();
     if (set == nullptr) {
         return nullptr;
@@ -32,7 +32,7 @@ void RelativeComplementSet::updateElements() noexcept {
 
     if (parentElements == nullptr && setElements != nullptr) {
         // the only infinite relative complement set occurs when both parent set is infinite, and subset is finite
-        complementElements_ = std::make_unique<std::set<std::string>>();
+        complementElements_ = std::make_unique<std::set<pstring>>();
         const auto* parentComplementElements = parent_->complementElements();
         // https://proofwiki.org/wiki/Set_Difference_as_Intersection_with_Complement
         // A Difference B = A Intersect ~B
@@ -49,7 +49,7 @@ void RelativeComplementSet::updateElements() noexcept {
             std::inserter(*complementElements_, complementElements_->begin())
         );
     } else {
-        elements_ = std::make_unique<std::set<std::string>>();
+        elements_ = std::make_unique<std::set<pstring>>();
         if (parentElements == nullptr && setElements == nullptr) {
             const auto* parentComplementElements = parent_->complementElements();
             const auto* setComplementElements = derivesFrom()[0]->complementElements();
@@ -66,10 +66,10 @@ void RelativeComplementSet::updateElements() noexcept {
             );
         // parentElements and setElements must be finite at this point, therefore, sanity checks
         } else if (parentElements == nullptr) {
-            std::cout << "[FATAL ERROR]: A condition where a parent has infinite elements despite passing the only infinite element case should never happen.\n";
+            pcout << "[FATAL ERROR]: A condition where a parent has infinite elements despite passing the only infinite element case should never happen.\n";
             exitProgram();
         } else if (setElements == nullptr) {
-            std::cout << "[FATAL ERROR]: A condition where a subset of parent has infinite elements where the parent has finite should never happen.\n";
+            pcout << "[FATAL ERROR]: A condition where a subset of parent has infinite elements where the parent has finite should never happen.\n";
             exitProgram();
         // parentElements and setElements REALLY must be finite at this point
         } else {

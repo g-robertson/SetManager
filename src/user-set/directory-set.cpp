@@ -11,30 +11,31 @@
 #include "helpers.hpp"
 
 #include <filesystem>
+#include <locale>
 
-DirectorySet::DirectorySet(UserSet* parent, const std::string& name) noexcept
-    : SubSet(parent, name, std::make_unique<std::set<std::string>>())
+DirectorySet::DirectorySet(UserSet* parent, const pstring& name) noexcept
+    : SubSet(parent, name, std::make_unique<std::set<pstring>>())
 {}
 
-DirectorySet::DirectorySet(UserSet* parent, const std::string& name, const std::string& directory) noexcept
-    : SubSet(parent, name, std::make_unique<std::set<std::string>>()), directory_(std::filesystem::absolute(directory))
+DirectorySet::DirectorySet(UserSet* parent, const pstring& name, const std::filesystem::path& directory) noexcept
+    : SubSet(parent, name, std::make_unique<std::set<pstring>>()), directory_(std::filesystem::absolute(directory))
 {
     updateElements();
 }
 
-UserSet* DirectorySet::createSet(UserSet& parent, const std::string& name) noexcept {
-    std::cout << "Enter the name of the directory you would like this set to mirror: ";
-    std::string directory;
-    ignoreAll(std::cin);
-    std::getline(std::cin, directory);
+UserSet* DirectorySet::createSet(UserSet& parent, const pstring& name) noexcept {
+    pcout << "Enter the name of the directory you would like this set to mirror: ";
+    std::filesystem::path directory_;
+    pCinIgnoreAll();;
+    pCinGetLine(directory_);
 
-    return new DirectorySet(&parent, name, directory);
+    return new DirectorySet(&parent, name, directory_);
 }
 
 const auto DIRECTORY_SET_MENU = ReinterpretMenu<DirectorySet, UserSet, void>({
-    {"LD", {"List mirrored directory", &DirectorySet::listMirroredDirectory}},
-    {"X", {"Exit set-specific options", &DirectorySet::exitSetSpecificOptions}},
-    {UserSet::EXIT_KEYWORD, {"Exit the program", &DirectorySet::exitProgram}}
+    {pliteral("LD"), {pliteral("List mirrored directory"), &DirectorySet::listMirroredDirectory}},
+    {pliteral("X"), {pliteral("Exit set-specific options"), &DirectorySet::exitSetSpecificOptions}},
+    {UserSet::EXIT_KEYWORD, {pliteral("Exit the program"), &DirectorySet::exitProgram}}
 });
 
 const Menu<UserSet, void>& DirectorySet::setSpecificMenu() const noexcept {
@@ -42,29 +43,29 @@ const Menu<UserSet, void>& DirectorySet::setSpecificMenu() const noexcept {
 }
 
 void DirectorySet::changeDirectory() noexcept {
-    std::cout << "Enter the name of the directory you would like this set to mirror: ";
-    std::string directory;
-    ignoreAll(std::cin);
-    std::getline(std::cin, directory);
+    pcout << "Enter the name of the directory you would like this set to mirror: ";
+    std::filesystem::path directory;
+    pCinIgnoreAll();;
+    pCinGetLine(directory);
     directory_ = std::filesystem::absolute(directory);
 
     updateElements();
 }
 
 void DirectorySet::listMirroredDirectory() noexcept {
-    std::cout << directory() << '\n';
+    pcout << directory() << '\n';
 }
 
-std::string_view DirectorySet::directory() const noexcept {
-    return directory_.generic_string();
+pstring_view DirectorySet::directory() const noexcept {
+    return directory_.c_str();
 }
 
 void DirectorySet::handleDirectoryError() noexcept {
-    std::cout << "The directory '" << directory() << "' is unaccessible,\n"
+    pcout << "The directory '" << directory() << "' is unaccessible,\n"
               << "you may either delete this set, change  exit the program, or the program can continue running with the previously gathered directory contents (this will be nothing on load)\n"
               << "Enter [D] to delete, [E] to exit the program without saving, or anything else to continue: ";
-    std::string input;
-    std::cin >> input;
+    pstring input;
+    pcin >> input;
     if (std::toupper(input[0], std::locale()) == 'D') {
         parent()->onQueryRemove = this;
         queryable = false;
@@ -76,29 +77,31 @@ void DirectorySet::handleDirectoryError() noexcept {
 }
 
 void DirectorySet::saveMachineSubset(std::ostream& saveLocation) noexcept {
-    std::string_view directoryString = directory_.generic_string();
-    saveLocation << directoryString.size() << ' ' << directoryString;
+    pstring_view directoryString = directory_.c_str();
+    std::string genericDirectoryString = genericStringFromPString(directoryString);
+    saveLocation << genericDirectoryString.size() << ' ' << genericDirectoryString;
 }
 
 void DirectorySet::loadMachineSubset(std::istream& loadLocation) noexcept {
     size_t directorySize;
     loadLocation >> directorySize;
-    // directory names require null termination, I don't know why, it's probably documented somewhere
-    std::string directoryString = std::string(directorySize + 1, '\0');
+    
+    std::string genericDirectoryString = std::string(directorySize + 1, '\0');
     skipRead(loadLocation, 1);
-    loadLocation.read(directoryString.data(), directorySize);
+    loadLocation.read(genericDirectoryString.data(), directorySize);
+    pstring directoryString = genericStringToPString(genericDirectoryString);
 
     directory_ = std::filesystem::absolute(directoryString);
 }
 
 void DirectorySet::updateElements() noexcept {
-    std::set<std::string> newElements;
+    std::set<pstring> newElements;
     try {
         if (!std::filesystem::is_directory(directory_)) {
             throw std::logic_error("Unresolveable, Directory set created on directory that does not exist.");
         }
         for (const auto& entry : std::filesystem::directory_iterator(directory_)) {
-            newElements.insert(entry.path().lexically_relative(directory_).generic_string());
+            newElements.insert(entry.path().lexically_relative(directory_).c_str());
         }
     } catch (...) {
         handleDirectoryError();

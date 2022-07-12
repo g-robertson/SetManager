@@ -6,15 +6,15 @@
 
 #include <algorithm>
 
-IntersectionSet::IntersectionSet(UserSet* parent, const std::string& name, UserSet* set1, UserSet* set2) noexcept
+IntersectionSet::IntersectionSet(UserSet* parent, const pstring& name, UserSet* set1, UserSet* set2) noexcept
     : DerivativeSet(parent, name, {set1, set2})
 {}
 
-IntersectionSet::IntersectionSet(UserSet* parent, const std::string& name) noexcept
+IntersectionSet::IntersectionSet(UserSet* parent, const pstring& name) noexcept
     : DerivativeSet(parent, name)
 {}
 
-UserSet* IntersectionSet::createSet(UserSet& parent, const std::string& name) noexcept {
+UserSet* IntersectionSet::createSet(UserSet& parent, const pstring& name) noexcept {
     auto* set1 = parent.queryForSubset();
     if (set1 == nullptr) {
         return nullptr;
@@ -35,7 +35,7 @@ void IntersectionSet::updateElements() noexcept {
     const auto* set2Elements = derivesFrom().at(1)->elements();
     if (set1Elements == nullptr && set2Elements == nullptr) {
         // you cannot specify an infinite number of complement elements to negate the infinite sets that will be combined, so this set must be infinite
-        complementElements_ = std::make_unique<std::set<std::string>>();
+        complementElements_ = std::make_unique<std::set<pstring>>();
         const auto* set1ComplementElements = derivesFrom().at(0)->complementElements();
         const auto* set2ComplementElements = derivesFrom().at(1)->complementElements();
         // https://proofwiki.org/wiki/De_Morgan%27s_Laws_(Set_Theory)/Set_Complement/Complement_of_Intersection
@@ -46,7 +46,7 @@ void IntersectionSet::updateElements() noexcept {
             std::inserter(*complementElements_, complementElements_->begin())
         );
     } else {
-        elements_ = std::make_unique<std::set<std::string>>();
+        elements_ = std::make_unique<std::set<pstring>>();
         if (set2Elements == nullptr) {
             // https://proofwiki.org/wiki/Set_Difference_as_Intersection_with_Complement
             // A Difference B = A Intersect ~B

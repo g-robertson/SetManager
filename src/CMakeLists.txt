@@ -1,5 +1,6 @@
 target_sources(SetManager
     PRIVATE helpers.cpp
+    PRIVATE platform.cpp
 ) 
 
 target_include_directories(SetManager

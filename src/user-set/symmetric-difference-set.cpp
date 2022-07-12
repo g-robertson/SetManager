@@ -6,15 +6,15 @@
 
 #include <algorithm>
 
-SymmetricDifferenceSet::SymmetricDifferenceSet(UserSet* parent, const std::string& name, UserSet* set1, UserSet* set2) noexcept
+SymmetricDifferenceSet::SymmetricDifferenceSet(UserSet* parent, const pstring& name, UserSet* set1, UserSet* set2) noexcept
     : DerivativeSet(parent, name, {set1, set2})
 {}
 
-SymmetricDifferenceSet::SymmetricDifferenceSet(UserSet* parent, const std::string& name) noexcept
+SymmetricDifferenceSet::SymmetricDifferenceSet(UserSet* parent, const pstring& name) noexcept
     : DerivativeSet(parent, name)
 {}
 
-UserSet* SymmetricDifferenceSet::createSet(UserSet& parent, const std::string& name) noexcept {
+UserSet* SymmetricDifferenceSet::createSet(UserSet& parent, const pstring& name) noexcept {
     auto* set1 = parent.queryForSubset();
     if (set1 == nullptr) {
         return nullptr;
@@ -37,7 +37,7 @@ void SymmetricDifferenceSet::updateElements() noexcept {
     if ((set1Elements == nullptr) != (set2Elements == nullptr)) {
         // symmetric difference between a finite set and infinite set yields an infinite set,
         // so if set1 is different infinity type from set2, return nullptr
-        complementElements_ = std::make_unique<std::set<std::string>>();
+        complementElements_ = std::make_unique<std::set<pstring>>();
         const auto* set1ComplementElements = derivesFrom().at(0)->complementElements();
         const auto* set2ComplementElements = derivesFrom().at(1)->complementElements();
         if (set2ComplementElements == nullptr) {
@@ -54,8 +54,8 @@ void SymmetricDifferenceSet::updateElements() noexcept {
             // https://proofwiki.org/wiki/De_Morgan%27s_Laws_(Set_Theory)/Set_Complement/Complement_of_Intersection
             // ~(A Intersect B) = ~A Union ~B
             // => ~(A SymmetricDifference B) = (~A Union B) Difference (~A Intersect B)
-            std::set<std::string> unionSet;
-            std::set<std::string> intersectSet;
+            std::set<pstring> unionSet;
+            std::set<pstring> intersectSet;
             std::set_union(
                 set1ComplementElements->begin(), set1ComplementElements->end(),
                 set2Elements->begin(), set2Elements->end(),
@@ -74,8 +74,8 @@ void SymmetricDifferenceSet::updateElements() noexcept {
         } else {
             const auto* set1Elements = derivesFrom().at(0)->elements();
             // same thing as above, but backwards
-            std::set<std::string> unionSet;
-            std::set<std::string> intersectSet;
+            std::set<pstring> unionSet;
+            std::set<pstring> intersectSet;
             std::set_union(
                 set2ComplementElements->begin(), set2ComplementElements->end(),
                 set1Elements->begin(), set1Elements->end(),
@@ -93,7 +93,7 @@ void SymmetricDifferenceSet::updateElements() noexcept {
             );
         }
     } else {
-        elements_ = std::make_unique<std::set<std::string>>();
+        elements_ = std::make_unique<std::set<pstring>>();
         if (set1Elements == nullptr && set2Elements == nullptr) {
             const auto* set1ComplementElements = derivesFrom().at(0)->complementElements();
             const auto* set2ComplementElements = derivesFrom().at(1)->complementElements();

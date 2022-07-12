@@ -6,15 +6,15 @@
 
 #include <algorithm>
 
-UnionSet::UnionSet(UserSet* parent, const std::string& name, UserSet* set1, UserSet* set2) noexcept
+UnionSet::UnionSet(UserSet* parent, const pstring& name, UserSet* set1, UserSet* set2) noexcept
     : DerivativeSet(parent, name, {set1, set2})
 {}
 
-UnionSet::UnionSet(UserSet* parent, const std::string& name) noexcept
+UnionSet::UnionSet(UserSet* parent, const pstring& name) noexcept
     : DerivativeSet(parent, name)
 {}
 
-UserSet* UnionSet::createSet(UserSet& parent, const std::string& name) noexcept {
+UserSet* UnionSet::createSet(UserSet& parent, const pstring& name) noexcept {
     auto* set1 = parent.queryForSubset();
     if (set1 == nullptr) {
         return nullptr;
@@ -36,7 +36,7 @@ void UnionSet::updateElements() noexcept {
 
     if (set1Elements == nullptr || set2Elements == nullptr) {
         // infinite union something will always be infinite
-        complementElements_ = std::make_unique<std::set<std::string>>();
+        complementElements_ = std::make_unique<std::set<pstring>>();
         const auto* set1ComplementElements = derivesFrom().at(0)->complementElements();
         const auto* set2ComplementElements = derivesFrom().at(1)->complementElements();
         if (set2ComplementElements == nullptr) {
@@ -71,7 +71,7 @@ void UnionSet::updateElements() noexcept {
             );
         }
     } else {
-        elements_ = std::make_unique<std::set<std::string>>();
+        elements_ = std::make_unique<std::set<pstring>>();
         // does exactly what it says
         std::set_union(
             set1Elements->begin(), set1Elements->end(),

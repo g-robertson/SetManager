@@ -13,10 +13,10 @@
 
 DerivativeSet::DerivativeSet(
     UserSet* parent,
-    const std::string& name,
+    const pstring& name,
     std::initializer_list<UserSet*> userSets,
-    std::unique_ptr<std::set<std::string>> elements,
-    std::unique_ptr<std::set<std::string>> complementElements
+    std::unique_ptr<std::set<pstring>> elements,
+    std::unique_ptr<std::set<pstring>> complementElements
 ) noexcept
     : SubSet(parent, name, std::move(elements), std::move(complementElements)), derivesFrom_(new std::vector<UserSet*>(userSets))
 {}
@@ -24,11 +24,11 @@ DerivativeSet::DerivativeSet(
 // Note: It is undefined behavior to instantiate this class with the parent, name constructor and then not run postSiblingsLoad() hook
 DerivativeSet::DerivativeSet(
     UserSet* parent,
-    const std::string& name,
-    std::unique_ptr<std::set<std::string>> elements,
-    std::unique_ptr<std::set<std::string>> complementElements
+    const pstring& name,
+    std::unique_ptr<std::set<pstring>> elements,
+    std::unique_ptr<std::set<pstring>> complementElements
 ) noexcept
-    : SubSet(parent, name, std::move(elements), std::move(complementElements)), derivesFromNames_(new std::vector<std::vector<std::string>>)
+    : SubSet(parent, name, std::move(elements), std::move(complementElements)), derivesFromNames_(new std::vector<std::vector<pstring>>)
 {}
 
 DerivativeSet::~DerivativeSet() noexcept {
@@ -49,7 +49,8 @@ void DerivativeSet::saveMachineSubset(std::ostream& saveLocation) noexcept {
         std::stringstream nestedSubsetsWrite;
         int nestedCount = -1;
         for (; userSet != parent(); userSet = userSet->parent()) {
-            nestedSubsetsWrite << ' ' << userSet->name().size() << ' ' << userSet->name();
+            auto genericUserSetName = genericStringFromPString(userSet->name());
+            nestedSubsetsWrite << ' ' << genericUserSetName.size() << ' ' << genericUserSetName;
             ++nestedCount;
         }
         saveLocation << ' ' << nestedCount << nestedSubsetsWrite.str();
@@ -64,15 +65,16 @@ void DerivativeSet::loadMachineSubset(std::istream& loadLocation) noexcept {
     for (; userSetsCount > 0; --userSetsCount) {
         int nestedCount;
         loadLocation >> nestedCount;
-        std::vector<std::string> userSetNames;
+        std::vector<pstring> userSetNames;
         userSetNames.resize(nestedCount + 1);
         for (; nestedCount >= 0; --nestedCount) {
             int userSetSize;
             loadLocation >> userSetSize;
-            std::string userSetName;
-            userSetName.resize(userSetSize);
+            std::string genericUserSetName;
+            genericUserSetName.resize(userSetSize);
             skipRead(loadLocation, 1);
-            loadLocation.read(userSetName.data(), userSetSize);
+            loadLocation.read(genericUserSetName.data(), userSetSize);
+            pstring userSetName = genericStringToPString(genericUserSetName);
             userSetNames[nestedCount] = std::move(userSetName);
         }
         derivesFromNames_->push_back(std::move(userSetNames));
@@ -97,7 +99,7 @@ void DerivativeSet::postSiblingsLoad() noexcept(false) {
         throw std::logic_error("Recursive parent loading detected");
     }
     // immediately make it valid after calling postSiblingsLoad
-    std::vector<std::vector<std::string>> derivesFromNames = std::move(*derivesFromNames_);
+    std::vector<std::vector<pstring>> derivesFromNames = std::move(*derivesFromNames_);
     delete derivesFromNames_;
     derivesFrom_ = new std::vector<UserSet*>;
     derivesFrom_->reserve(derivesFromNames.size());
@@ -110,7 +112,7 @@ void DerivativeSet::postSiblingsLoad() noexcept(false) {
             auto& userSetSubsets = userSet->subsets();
             auto userSetIt = userSetSubsets.find(userSetName);
             if (userSetIt == userSetSubsets.end()) {
-                throw std::logic_error(std::string("User set '") + userSetName + "' included in derivative set could not be found");
+                throw std::logic_error(std::string("User set '") + genericStringFromPString(userSetName) + "' included in derivative set could not be found");
             }
             userSet = userSetIt->second.get();
         }

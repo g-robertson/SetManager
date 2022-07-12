@@ -11,7 +11,7 @@
 class GlobalSet : public UserSet {
     public:
         GlobalSet();
-        std::string_view name() const noexcept override;
+        pstring_view name() const noexcept override;
 
         // #region UserSet public members override
         static constexpr char type_ = 'G';
@@ -22,5 +22,5 @@ class GlobalSet : public UserSet {
         void updateElements() noexcept override;
         // #endregion
     private:
-        const Menu<void, UserSet*, UserSet&, const std::string&>& createableSubsetMenu() const noexcept override;
+        const Menu<void, UserSet*, UserSet&, const pstring&>& createableSubsetMenu() const noexcept override;
 };

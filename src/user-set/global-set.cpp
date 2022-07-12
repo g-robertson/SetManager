@@ -16,11 +16,11 @@
 #include "relative-complement-set.hpp"
 
 GlobalSet::GlobalSet()
-    : UserSet(std::make_unique<std::set<std::string>>())
+    : UserSet(std::make_unique<std::set<pstring>>())
 {}
 
-std::string_view GlobalSet::name() const noexcept {
-    return "GLOBAL";
+pstring_view GlobalSet::name() const noexcept {
+    return pliteral("GLOBAL");
 }
 
 void GlobalSet::saveMachineSubset(std::ostream&) noexcept {
@@ -32,18 +32,18 @@ void GlobalSet::loadMachineSubset(std::istream&) noexcept {
 void GlobalSet::updateElements() noexcept {
 }
 
-const auto GLOBAL_CREATEABLE_SUBSET_MENU = StaticMenu<void, UserSet*, UserSet&, const std::string&>({
-    {std::string(1, WordSet::type_), {"WordSet", WordSet::createSet}},
-    {std::string(1, FauxWordSet::type_), {"FauxWordSet", FauxWordSet::createSet}},
-    {std::string(1, DirectorySet::type_), {"DirectorySet", DirectorySet::createSet}},
-    {std::string(1, IntersectionSet::type_), {"IntersectionSet", IntersectionSet::createSet}},
-    {std::string(1, UnionSet::type_), {"UnionSet", UnionSet::createSet}},
-    {std::string(1, DifferenceSet::type_), {"DifferenceSet", DifferenceSet::createSet}},
-    {std::string(1, SymmetricDifferenceSet::type_), {"SymmetricDifferenceSet", SymmetricDifferenceSet::createSet}},
-    {std::string(1, RelativeComplementSet::type_), {"RelativeComplementSet", RelativeComplementSet::createSet}},
-    {UserSet::EXIT_KEYWORD, {"Exit", UserSet::EXIT_SET_MENU}}
+const auto GLOBAL_CREATEABLE_SUBSET_MENU = StaticMenu<void, UserSet*, UserSet&, const pstring&>({
+    {pstring(1, WordSet::type_), {pliteral("WordSet"), WordSet::createSet}},
+    {pstring(1, FauxWordSet::type_), {pliteral("FauxWordSet"), FauxWordSet::createSet}},
+    {pstring(1, DirectorySet::type_), {pliteral("DirectorySet"), DirectorySet::createSet}},
+    {pstring(1, IntersectionSet::type_), {pliteral("IntersectionSet"), IntersectionSet::createSet}},
+    {pstring(1, UnionSet::type_), {pliteral("UnionSet"), UnionSet::createSet}},
+    {pstring(1, DifferenceSet::type_), {pliteral("DifferenceSet"), DifferenceSet::createSet}},
+    {pstring(1, SymmetricDifferenceSet::type_), {pliteral("SymmetricDifferenceSet"), SymmetricDifferenceSet::createSet}},
+    {pstring(1, RelativeComplementSet::type_), {pliteral("RelativeComplementSet"), RelativeComplementSet::createSet}},
+    {UserSet::EXIT_KEYWORD, {pliteral("Exit"), UserSet::EXIT_SET_MENU}}
 });
 
-const Menu<void, UserSet*, UserSet&, const std::string&>& GlobalSet::createableSubsetMenu() const noexcept {
+const Menu<void, UserSet*, UserSet&, const pstring&>& GlobalSet::createableSubsetMenu() const noexcept {
     return GLOBAL_CREATEABLE_SUBSET_MENU;
 }

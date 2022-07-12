@@ -13,17 +13,17 @@ class SubSet : public UserSet {
     public:
         SubSet(
             UserSet* parent,
-            const std::string& name,
-            std::unique_ptr<std::set<std::string>> elements = std::unique_ptr<std::set<std::string>>(),
-            std::unique_ptr<std::set<std::string>> complementElements = std::unique_ptr<std::set<std::string>>()
+            const pstring& name,
+            std::unique_ptr<std::set<pstring>> elements = std::unique_ptr<std::set<pstring>>(),
+            std::unique_ptr<std::set<pstring>> complementElements = std::unique_ptr<std::set<pstring>>()
         ) noexcept;
         // Must exist in all derived SubSets for creation
-        // static UserSet* createSet(UserSet& parent, const std::string& name) noexcept;
+        // static UserSet* createSet(UserSet& parent, const pstring& name) noexcept;
 
-        std::string_view name() const noexcept override;
+        pstring_view name() const noexcept override;
     private:
         // Queries which subsets are able to be created from SubSet type UserSets
-        const Menu<void, UserSet*, UserSet&, const std::string&>& createableSubsetMenu() const noexcept override;
+        const Menu<void, UserSet*, UserSet&, const pstring&>& createableSubsetMenu() const noexcept override;
 
-        std::string name_;
+        pstring name_;
 };

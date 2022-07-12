@@ -8,7 +8,6 @@
 #include <stack>
 #include <iomanip>
 #include <memory>
-#include <numeric>
 
 namespace {
     std::stack<std::unique_ptr<std::ios>> formats;
@@ -31,7 +30,7 @@ std::ostream& operator<<(std::ostream& ostr, const replaceformat_&) {
 }
 
 
-bool insensitiveSame(const std::string& str1, const std::string& str2) {
+bool insensitiveSame(const pstring& str1, const pstring& str2) {
     return str1.size() == str2.size() && std::equal(str1.begin(), str1.end(), str2.begin(), str2.end(), [](auto char1, auto char2) {
         return std::toupper(char1, std::locale()) == std::toupper(char2, std::locale());
     });

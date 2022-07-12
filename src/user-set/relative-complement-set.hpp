@@ -8,11 +8,11 @@
 
 class RelativeComplementSet : public DerivativeSet {
     public:
-        RelativeComplementSet(UserSet* parent, const std::string& name, UserSet* set) noexcept;
-        RelativeComplementSet(UserSet* parent, const std::string& name) noexcept;
+        RelativeComplementSet(UserSet* parent, const pstring& name, UserSet* set) noexcept;
+        RelativeComplementSet(UserSet* parent, const pstring& name) noexcept;
     
         // #region SubSet public members override 
-        static UserSet* createSet(UserSet& parent, const std::string& name) noexcept;
+        static UserSet* createSet(UserSet& parent, const pstring& name) noexcept;
         // #endregion 
         // #region UserSet public members override 
         static constexpr char type_ = 'C';
