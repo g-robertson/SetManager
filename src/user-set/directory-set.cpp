@@ -56,7 +56,7 @@ void DirectorySet::listMirroredDirectory() noexcept {
 }
 
 std::string_view DirectorySet::directory() const noexcept {
-    return directory_.c_str();
+    return directory_.generic_string();
 }
 
 void DirectorySet::handleDirectoryError() noexcept {
@@ -76,7 +76,7 @@ void DirectorySet::handleDirectoryError() noexcept {
 }
 
 void DirectorySet::saveMachineSubset(std::ostream& saveLocation) noexcept {
-    std::string_view directoryString = directory_.c_str();
+    std::string_view directoryString = directory_.generic_string();
     saveLocation << directoryString.size() << ' ' << directoryString;
 }
 
