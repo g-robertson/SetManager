@@ -11,18 +11,22 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-# Easier compile flags for linux-based windows builds
-if(LINWIN32)
-    set(CMAKE_C_COMPILER "i664-w64-mingw32-gcc")
-    set(CMAKE_CXX_COMPILER "i686-w64-mingw32-g++")
-elseif(LINWIN64)
-    set(CMAKE_C_COMPILER "x86_64-w64-mingw32-gcc")
-    set(CMAKE_CXX_COMPILER "x86_64-w64-mingw32-g++")
-endif()
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
+# Easier compile flags for linux-based windows builds
+if(LINWIN32)
+    set(CMAKE_C_COMPILER "i664-w64-mingw32-gcc")
+    set(CMAKE_CXX_COMPILER "i686-w64-mingw32-g++")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
+elseif(LINWIN64)
+    set(CMAKE_C_COMPILER "x86_64-w64-mingw32-gcc")
+    set(CMAKE_CXX_COMPILER "x86_64-w64-mingw32-g++")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
+endif()
+
 
 set(SET_MANAGER_VERSION 0.0.1)
 
