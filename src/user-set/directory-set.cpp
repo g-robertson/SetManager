@@ -19,7 +19,7 @@ DirectorySet::DirectorySet(UserSet* parent, const std::string& name) noexcept
 {}
 
 DirectorySet::DirectorySet(UserSet* parent, const std::string& name, const std::filesystem::path& directory) noexcept
-    : SubSet(parent, name, std::make_unique<std::set<std::string>>()), directory_(std::filesystem::absolute(directory))
+    : SubSet(parent, name, std::make_unique<std::set<std::string>>()), directory_(std::filesystem::absolute(directory)), denativeDirectory_(denativePath(directory_))
 {
     updateElements();
 }
@@ -49,16 +49,18 @@ void DirectorySet::changeDirectory() noexcept {
     ignoreAll(nowide::cin);;
     std::getline(nowide::cin, directory);
     directory_ = std::filesystem::absolute(nativeString(directory));
+    denativeDirectory_ = denativePath(directory_);
 
     updateElements();
 }
 
 void DirectorySet::listMirroredDirectory() noexcept {
+
     nowide::cout << directory() << '\n';
 }
 
 std::string_view DirectorySet::directory() const noexcept {
-    return directory_.string();
+    return denativeDirectory_;
 }
 
 void DirectorySet::handleDirectoryError() noexcept {
@@ -78,8 +80,7 @@ void DirectorySet::handleDirectoryError() noexcept {
 }
 
 void DirectorySet::saveMachineSubset(std::ostream& saveLocation) noexcept {
-    std::string_view directoryString = directory_.string();
-    saveLocation << directoryString.size() << ' ' << directoryString;
+    saveLocation << directory().size() << ' ' << directory();
 }
 
 void DirectorySet::loadMachineSubset(std::istream& loadLocation) noexcept {
@@ -90,7 +91,8 @@ void DirectorySet::loadMachineSubset(std::istream& loadLocation) noexcept {
     skipRead(loadLocation, 1);
     loadLocation.read(directoryString.data(), directorySize);
 
-    directory_ = std::filesystem::absolute(directoryString);
+    directory_ = std::filesystem::absolute(nativeString(directoryString));
+    denativeDirectory_ = denativePath(directory_);
 }
 
 void DirectorySet::updateElements() noexcept {
@@ -100,7 +102,7 @@ void DirectorySet::updateElements() noexcept {
             throw std::logic_error("Unresolveable, Directory set created on directory that does not exist.");
         }
         for (const auto& entry : std::filesystem::directory_iterator(directory_)) {
-            newElements.insert(entry.path().lexically_relative(directory_).string());
+            newElements.insert(denativePath(entry.path().lexically_relative(directory_)));
         }
     } catch (...) {
         handleDirectoryError();

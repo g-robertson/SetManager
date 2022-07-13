@@ -41,4 +41,5 @@ class DirectorySet : public SubSet {
         void handleDirectoryError() noexcept;
 
         std::filesystem::path directory_;
+        std::string denativeDirectory_;
 }; 
