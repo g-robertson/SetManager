@@ -252,7 +252,7 @@ void pCinIgnoreAll() {
 }
 
 pchar ptolower(pchar character) {
-    return std::tolower(character, loc);
+    return std::tolower(character);
 }
 
 pchar ptoupper(pchar character) {

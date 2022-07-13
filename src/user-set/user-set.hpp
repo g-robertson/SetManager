@@ -68,7 +68,7 @@ class UserSet {
         const std::set<pstring>* elements() const noexcept;
         const std::set<pstring>* complementElements() const noexcept;
 
-        constexpr static pstring_view EXIT_KEYWORD = L"EXIT";
+        constexpr static pstring_view EXIT_KEYWORD = pliteral("EXIT");
         const static std::set<pstring> NO_ELEMENTS;
         const static std::filesystem::path DEFAULT_MACHINE_LOCATION;
         const static std::filesystem::path DEFAULT_HUMAN_LOCATION;
