@@ -8,11 +8,11 @@
 
 class IntersectionSet : public DerivativeSet {
     public:
-        IntersectionSet(UserSet* parent, const pstring& name, UserSet* set1, UserSet* set2) noexcept;
-        IntersectionSet(UserSet* parent, const pstring& name) noexcept;
+        IntersectionSet(UserSet* parent, const std::string& name, UserSet* set1, UserSet* set2) noexcept;
+        IntersectionSet(UserSet* parent, const std::string& name) noexcept;
     
         // #region SubSet public members override 
-        static UserSet* createSet(UserSet& parent, const pstring& name) noexcept;
+        static UserSet* createSet(UserSet& parent, const std::string& name) noexcept;
         // #endregion 
         // #region UserSet public members override 
         static constexpr char type_ = 'I';

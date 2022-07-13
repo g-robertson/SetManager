@@ -5,8 +5,6 @@
 */
 #pragma once
 
-#include "platform.hpp"
-
 #include <istream>
 #include <ostream>
 #include <numeric>
@@ -23,7 +21,7 @@ class replaceformat_ {
 
 const replaceformat_ replaceformat;
 
-bool insensitiveSame(pstring_view str1, pstring_view str2);
+bool insensitiveSame(std::string_view str1, std::string_view str2);
 
 void skipRead(std::istream& istr, size_t count);
 

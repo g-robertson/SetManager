@@ -6,15 +6,15 @@
 
 #include <algorithm>
 
-DifferenceSet::DifferenceSet(UserSet* parent, const pstring& name, UserSet* set1, UserSet* set2) noexcept
+DifferenceSet::DifferenceSet(UserSet* parent, const std::string& name, UserSet* set1, UserSet* set2) noexcept
     : DerivativeSet(parent, name, {set1, set2})
 {}
 
-DifferenceSet::DifferenceSet(UserSet* parent, const pstring& name) noexcept
+DifferenceSet::DifferenceSet(UserSet* parent, const std::string& name) noexcept
     : DerivativeSet(parent, name)
 {}
 
-UserSet* DifferenceSet::createSet(UserSet& parent, const pstring& name) noexcept {
+UserSet* DifferenceSet::createSet(UserSet& parent, const std::string& name) noexcept {
     auto* set1 = parent.queryForSubset();
     if (set1 == nullptr) {
         return nullptr;
@@ -36,7 +36,7 @@ void DifferenceSet::updateElements() noexcept {
 
     if (set1Elements == nullptr && set2Elements != nullptr) {
         // infinite - finite will always be infinite, anything else (including infinite - infinite) will always be finite
-        complementElements_ = std::make_unique<std::set<pstring>>();
+        complementElements_ = std::make_unique<std::set<std::string>>();
         const auto* set1ComplementElements = derivesFrom().at(0)->complementElements();
         // https://proofwiki.org/wiki/Set_Difference_as_Intersection_with_Complement
         // A Difference B = A Intersect ~B
@@ -50,7 +50,7 @@ void DifferenceSet::updateElements() noexcept {
             std::inserter(*complementElements_, complementElements_->begin())
         );
     } else {
-        elements_ = std::make_unique<std::set<pstring>>();
+        elements_ = std::make_unique<std::set<std::string>>();
         if (set1Elements == nullptr && set2Elements == nullptr) {
             // https://proofwiki.org/wiki/Set_Difference_of_Complements
             // ~B Difference ~A = A Difference B

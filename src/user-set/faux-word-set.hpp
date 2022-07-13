@@ -15,9 +15,9 @@ class WordSet;
 class FauxWordSet : public SubSet {
     public:
         FauxWordSet(WordSet&& wordSet) noexcept;
-        FauxWordSet(UserSet* parent, const pstring& name) noexcept;
+        FauxWordSet(UserSet* parent, const std::string& name) noexcept;
         // #region SubSet public members override 
-        static UserSet* createSet(UserSet& parent, const pstring& name) noexcept;
+        static UserSet* createSet(UserSet& parent, const std::string& name) noexcept;
         // #endregion 
         // #region UserSet public members override 
         static constexpr char type_ = 'F';
@@ -34,14 +34,14 @@ class FauxWordSet : public SubSet {
         void removeContainedWord() noexcept;
         void listFauxElements() noexcept;
 
-        bool addElement(const pstring& element) noexcept;
-        void removedElement(const pstring& element, bool expected) noexcept override;
+        bool addElement(const std::string& element) noexcept;
+        void removedElement(const std::string& element, bool expected) noexcept override;
     private:
         // #region UserSet private members override 
         const Menu<UserSet, void>& setSpecificMenu() const noexcept override;
         // #endregion 
 
-        std::set<pstring> fauxElements;
+        std::set<std::string> fauxElements;
 
         friend class WordSet;
 };

@@ -8,11 +8,11 @@
 
 class UnionSet : public DerivativeSet {
     public:
-        UnionSet(UserSet* parent, const pstring& name, UserSet* set1, UserSet* set2) noexcept;
-        UnionSet(UserSet* parent, const pstring& name) noexcept;
+        UnionSet(UserSet* parent, const std::string& name, UserSet* set1, UserSet* set2) noexcept;
+        UnionSet(UserSet* parent, const std::string& name) noexcept;
     
         // #region SubSet public members override 
-        static UserSet* createSet(UserSet& parent, const pstring& name) noexcept;
+        static UserSet* createSet(UserSet& parent, const std::string& name) noexcept;
         // #endregion 
         // #region UserSet public members override 
         static constexpr char type_ = 'U';

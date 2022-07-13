@@ -42,4 +42,5 @@ project(SetManager
 add_executable(SetManager src/main.cpp)
 # Add src
 add_subdirectory(src)
+add_subdirectory(extern)
 target_include_directories(SetManager PRIVATE src)

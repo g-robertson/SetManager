@@ -14,11 +14,11 @@
 
 class DirectorySet : public SubSet {
     public:
-        DirectorySet(UserSet* parent, const pstring& name) noexcept;
-        DirectorySet(UserSet* parent, const pstring& name, const std::filesystem::path& directory) noexcept;
+        DirectorySet(UserSet* parent, const std::string& name) noexcept;
+        DirectorySet(UserSet* parent, const std::string& name, const std::filesystem::path& directory) noexcept;
 
         // #region SubSet public members override 
-        static UserSet* createSet(UserSet& parent, const pstring& name) noexcept;
+        static UserSet* createSet(UserSet& parent, const std::string& name) noexcept;
         // #endregion 
         // #region UserSet public members override 
         static constexpr char type_ = 'D';
@@ -32,7 +32,7 @@ class DirectorySet : public SubSet {
         void changeDirectory() noexcept;
         void listMirroredDirectory() noexcept;
 
-        pstring_view directory() const noexcept;
+        std::string_view directory() const noexcept;
     private:
         // #region UserSet private members override 
         const Menu<UserSet, void>& setSpecificMenu() const noexcept override;

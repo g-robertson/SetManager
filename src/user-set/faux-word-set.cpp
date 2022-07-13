@@ -15,25 +15,25 @@
 #include <algorithm>
 
 FauxWordSet::FauxWordSet(WordSet&& wordSet) noexcept 
-    : SubSet(wordSet.parent(), pstring(wordSet.name()), std::move(wordSet.elements_))
+    : SubSet(wordSet.parent(), std::string(wordSet.name()), std::move(wordSet.elements_))
 {}
 
-FauxWordSet::FauxWordSet(UserSet* parent, const pstring& name) noexcept
-    : SubSet(parent, name, std::make_unique<std::set<pstring>>())
+FauxWordSet::FauxWordSet(UserSet* parent, const std::string& name) noexcept
+    : SubSet(parent, name, std::make_unique<std::set<std::string>>())
 {}
 
-UserSet* FauxWordSet::createSet(UserSet& parent, const pstring& name) noexcept {
+UserSet* FauxWordSet::createSet(UserSet& parent, const std::string& name) noexcept {
     return new FauxWordSet(&parent, name);
 }
 
 const auto FAUX_WORD_SET_MENU = ReinterpretMenu<FauxWordSet, UserSet, void>({
-    {pliteral("A"), {pliteral("Add a word"), &FauxWordSet::addWord}},
-    {pliteral("AX"), {pliteral("Add a word from the parent set"), &FauxWordSet::addParentWord}},
-    {pliteral("R"), {pliteral("Remove a word"), &FauxWordSet::removeWord}},
-    {pliteral("RX"), {pliteral("Remove a word by number in this set"), &FauxWordSet::removeContainedWord}},
-    {pliteral("LE"), {pliteral("List faux elements"), &FauxWordSet::listFauxElements}},
-    {pliteral("X"), {pliteral("Exit set-specific options"), &FauxWordSet::exitSetSpecificOptions}},
-    {pstring(UserSet::EXIT_KEYWORD), {pliteral("Exit the program"), &FauxWordSet::exitProgram}}
+    {"A", {"Add a word", &FauxWordSet::addWord}},
+    {"AX", {"Add a word from the parent set", &FauxWordSet::addParentWord}},
+    {"R", {"Remove a word", &FauxWordSet::removeWord}},
+    {"RX", {"Remove a word by number in this set", &FauxWordSet::removeContainedWord}},
+    {"LE", {"List faux elements", &FauxWordSet::listFauxElements}},
+    {"X", {"Exit set-specific options", &FauxWordSet::exitSetSpecificOptions}},
+    {std::string(UserSet::EXIT_KEYWORD), {"Exit the program", &FauxWordSet::exitProgram}}
 });
 
 const Menu<UserSet, void>& FauxWordSet::setSpecificMenu() const noexcept {
@@ -41,20 +41,20 @@ const Menu<UserSet, void>& FauxWordSet::setSpecificMenu() const noexcept {
 }
 
 void FauxWordSet::addWord() noexcept {
-    pcout << "Specify a word you want to add to the set that exists in the parent set: ";
-    pstring word;
-    pCinIgnoreAll();;
-    pCinGetLine(word);
+    nowide::cout << "Specify a word you want to add to the set that exists in the parent set: ";
+    std::string word;
+    ignoreAll(nowide::cin);;
+    std::getline(nowide::cin, word);
 
     auto inserted = addElement(word);
     if (!inserted) {
-        pcout << "That word was already in the set and was therefore not inserted\n";
+        nowide::cout << "That word was already in the set and was therefore not inserted\n";
     }
 }
 
 void FauxWordSet::addParentWord() noexcept {
     if (parent()->elements() == nullptr) {
-        pcout << "The parent has an infinite set of elements and cannot be specified from\n";
+        nowide::cout << "The parent has an infinite set of elements and cannot be specified from\n";
         return;
     }
     int count = 0;
@@ -63,12 +63,12 @@ void FauxWordSet::addParentWord() noexcept {
             continue;
         }
         ++count;
-        pcout << count << ". '" << element << "'\n";
+        nowide::cout << count << ". '" << element << "'\n";
     }
 
     int selection = 0;
-    pcout << "Select a number to add from the parent set, or any number not specified to exit: ";
-    pcin >> selection;
+    nowide::cout << "Select a number to add from the parent set, or any number not specified to exit: ";
+    nowide::cin >> selection;
     if (selection > count || selection < 1) {
         return;
     }
@@ -89,29 +89,29 @@ void FauxWordSet::addParentWord() noexcept {
 }
 
 void FauxWordSet::removeWord() noexcept {
-    pcout << "Specify a word you want to remove from the set: ";
-    pstring word;
-    pCinIgnoreAll();;
-    pCinGetLine(word);
+    nowide::cout << "Specify a word you want to remove from the set: ";
+    std::string word;
+    ignoreAll(nowide::cin);;
+    std::getline(nowide::cin, word);
 
     removedElement(word, true);
 }
 
 void FauxWordSet::removeContainedWord() noexcept {
     if (fauxElements.size() == 0) {
-        pcout << "There are no fauxElements to select from to remove.\n";
+        nowide::cout << "There are no fauxElements to select from to remove.\n";
         return;
     }
 
     int count = 0;
     for (const auto& element : fauxElements) {
         ++count;
-        pcout << count << ". '" << element << "'\n";
+        nowide::cout << count << ". '" << element << "'\n";
     }
 
     int selection = 0;
-    pcout << "Select a number to remove from the set, or any number not specified to exit: ";
-    pcin >> selection;
+    nowide::cout << "Select a number to remove from the set, or any number not specified to exit: ";
+    nowide::cin >> selection;
     if (selection > count || selection < 1) {
         return;
     }
@@ -129,20 +129,19 @@ void FauxWordSet::removeContainedWord() noexcept {
 }
 
 void FauxWordSet::listFauxElements() noexcept {
-    pcout << "Element list\n"
-              << pstring(80, '-') << '\n'
+    nowide::cout << "Element list\n"
+              << std::string(80, '-') << '\n'
               << "This set contains faux elements:\n";
     for (const auto& element : fauxElements) {
-        pcout << '\'' << element << "'\n";
+        nowide::cout << '\'' << element << "'\n";
     }
-    pcout << pstring(80, '-') << '\n';
+    nowide::cout << std::string(80, '-') << '\n';
 }
 
 void FauxWordSet::saveMachineSubset(std::ostream& saveLocation) noexcept {
     saveLocation << fauxElements.size();
     for (const auto& element : fauxElements) {
-        std::string genericElement = genericStringFromPString(element);
-        saveLocation << ' ' << genericElement.size() << ' ' << genericElement;
+        saveLocation << ' ' << element.size() << ' ' << element;
     }
 }
 
@@ -153,13 +152,12 @@ void FauxWordSet::loadMachineSubset(std::istream& loadLocation) noexcept {
         size_t elementSize;
         loadLocation >> elementSize;
         // pre-creates a string of elementSize to read into
-        std::string genericElement;
-        genericElement.resize(elementSize);
+        std::string element;
+        element.resize(elementSize);
         // skips over the space after size
         skipRead(loadLocation, 1);
         // reads all of the text into the element
-        loadLocation.read(genericElement.data(), elementSize);
-        pstring element = genericStringToPString(std::move(genericElement));
+        loadLocation.read(element.data(), elementSize);
         fauxElements.emplace(std::move(element));
     }
 }
@@ -175,13 +173,13 @@ void FauxWordSet::updateElements() noexcept {
     }
 } 
 
-bool FauxWordSet::addElement(const pstring& element) noexcept {
+bool FauxWordSet::addElement(const std::string& element) noexcept {
     bool added = fauxElements.insert(element).second;
     updateElements();
     return added;
 }
 
-void FauxWordSet::removedElement(const pstring& element, bool expected) noexcept {
+void FauxWordSet::removedElement(const std::string& element, bool expected) noexcept {
     for (const auto& subset : subsets_) {
         subset.second->removedElement(element, expected);
     }

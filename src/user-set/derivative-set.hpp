@@ -19,17 +19,17 @@ class DerivativeSet : public SubSet {
     public:
         DerivativeSet(
             UserSet* parent,
-            const pstring& name,
+            const std::string& name,
             std::initializer_list<UserSet*> userSets,
-            std::unique_ptr<std::set<pstring>> elements = std::unique_ptr<std::set<pstring>>(),
-            std::unique_ptr<std::set<pstring>> complementElements = std::unique_ptr<std::set<pstring>>()
+            std::unique_ptr<std::set<std::string>> elements = std::unique_ptr<std::set<std::string>>(),
+            std::unique_ptr<std::set<std::string>> complementElements = std::unique_ptr<std::set<std::string>>()
         ) noexcept;
         // Note: It is undefined behavior to instantiate this class with the parent, name constructor and then not run postSiblingsLoad() hook
         DerivativeSet(
             UserSet* parent,
-            const pstring& name,
-            std::unique_ptr<std::set<pstring>> elements = std::unique_ptr<std::set<pstring>>(),
-            std::unique_ptr<std::set<pstring>> complementElements = std::unique_ptr<std::set<pstring>>()
+            const std::string& name,
+            std::unique_ptr<std::set<std::string>> elements = std::unique_ptr<std::set<std::string>>(),
+            std::unique_ptr<std::set<std::string>> complementElements = std::unique_ptr<std::set<std::string>>()
         ) noexcept;
         virtual ~DerivativeSet() noexcept;
 
@@ -47,7 +47,7 @@ class DerivativeSet : public SubSet {
     private:
         union {
             std::vector<UserSet*>* derivesFrom_;
-            std::vector<std::vector<pstring>>* derivesFromNames_;
+            std::vector<std::vector<std::string>>* derivesFromNames_;
         };
         bool postSiblingsLoading = false;
         bool postSiblingsLoaded = false;

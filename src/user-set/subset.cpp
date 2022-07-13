@@ -17,29 +17,29 @@
 
 SubSet::SubSet(
     UserSet* parent,
-    const pstring& name,
-    std::unique_ptr<std::set<pstring>> elements,
-    std::unique_ptr<std::set<pstring>> complementElements
+    const std::string& name,
+    std::unique_ptr<std::set<std::string>> elements,
+    std::unique_ptr<std::set<std::string>> complementElements
 ) noexcept
     : UserSet(parent, std::move(elements), std::move(complementElements)), name_(name)
 {}
 
-pstring_view SubSet::name() const noexcept {
+std::string_view SubSet::name() const noexcept {
     return name_;
 }
 
-const auto SUBSET_CREATEABLE_SUBSET_MENU = StaticMenu<void, UserSet*, UserSet&, const pstring&>({
-    {pstring(1, WordSet::type_), {pliteral("WordSet"), WordSet::createSet}},
-    {pstring(1, FauxWordSet::type_), {pliteral("FauxWordSet"), FauxWordSet::createSet}},
-    {pstring(1, IntersectionSet::type_), {pliteral("IntersectionSet"), IntersectionSet::createSet}},
-    {pstring(1, UnionSet::type_), {pliteral("UnionSet"), UnionSet::createSet}},
-    {pstring(1, DifferenceSet::type_), {pliteral("DifferenceSet"), DifferenceSet::createSet}},
-    {pstring(1, SymmetricDifferenceSet::type_), {pliteral("SymmetricDifferenceSet"), SymmetricDifferenceSet::createSet}},
-    {pstring(1, RelativeComplementSet::type_), {pliteral("RelativeComplementSet"), RelativeComplementSet::createSet}},
-    {pstring(UserSet::EXIT_KEYWORD), {pliteral("Exit"), UserSet::EXIT_SET_MENU}}
+const auto SUBSET_CREATEABLE_SUBSET_MENU = StaticMenu<void, UserSet*, UserSet&, const std::string&>({
+    {std::string(1, WordSet::type_), {"WordSet", WordSet::createSet}},
+    {std::string(1, FauxWordSet::type_), {"FauxWordSet", FauxWordSet::createSet}},
+    {std::string(1, IntersectionSet::type_), {"IntersectionSet", IntersectionSet::createSet}},
+    {std::string(1, UnionSet::type_), {"UnionSet", UnionSet::createSet}},
+    {std::string(1, DifferenceSet::type_), {"DifferenceSet", DifferenceSet::createSet}},
+    {std::string(1, SymmetricDifferenceSet::type_), {"SymmetricDifferenceSet", SymmetricDifferenceSet::createSet}},
+    {std::string(1, RelativeComplementSet::type_), {"RelativeComplementSet", RelativeComplementSet::createSet}},
+    {std::string(UserSet::EXIT_KEYWORD), {"Exit", UserSet::EXIT_SET_MENU}}
 });
 
 // Queries which subsets are able to be created from SubSet type UserSets
-const Menu<void, UserSet*, UserSet&, const pstring&>& SubSet::createableSubsetMenu() const noexcept {
+const Menu<void, UserSet*, UserSet&, const std::string&>& SubSet::createableSubsetMenu() const noexcept {
     return SUBSET_CREATEABLE_SUBSET_MENU;
 }
