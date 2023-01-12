@@ -144,7 +144,7 @@ class ReinterpretMenu : public Menu<TClass, TReturn, TArgs...> {
 
                 const auto& selectedMenuOptionKVP = optionMap_.find(input);
                 if (selectedMenuOptionKVP != optionMap_.end()) {
-                    return (reinterpret_cast<TDerived&>(object).*(selectedMenuOptionKVP->second.second))(std::forward<TArgs>(args)...);
+                    return (dynamic_cast<TDerived&>(object).*(selectedMenuOptionKVP->second.second))(std::forward<TArgs>(args)...);
                 }
             }
         }
